@@ -10,6 +10,62 @@ const CHANNEL_URL_REGEX = /youtube\.com\/channel\/(UC[\w-]{22})/;
 const CONCURRENCY_LIMIT = 3; // 同時実行数の制限
 const DEFAULT_LIMIT = 15;
 
+// エラーメッセージの定数化
+const ERROR_MESSAGES = {
+  EMPTY_LINE: '空行',
+  INVALID_AT: '@username 形式は非対応です。チャンネルID（UC...）を使用してください。',
+  INVALID_C: '/c/ 形式は廃止されました。チャンネルID（UC...）を使用してください。',
+  INVALID_FORMAT: '不正な形式です。チャンネルID（UC...）または /channel/UC... を入力してください。',
+  INPUT_REQUIRED: 'チャンネルIDまたはURLを入力してください。',
+  ALL_FAILED: '全てのチャンネルで取得に失敗しました。入力内容を確認してください。',
+  TIMEOUT: 'タイムアウトしました',
+  PROXY_UNAVAILABLE: '全てのCORS Proxyが利用できません。時間をおいて再試行してください。',
+  INVALID_XML: 'Invalid XML format',
+  CHANNEL_MISMATCH: '要求したチャンネルとRSSの発信元が一致しません',
+  INVALID_URL: '不正な動画URLを検出しました',
+  CHANNEL_NAME_UNKNOWN: 'チャンネル名不明',
+  TITLE_UNKNOWN: 'タイトル不明'
+};
+
+// UI要素のキャッシュ（DOMへの参照を一元管理）
+const UI = {
+  get fetchButton() { return document.getElementById('fetchButton'); },
+  get loading() { return document.getElementById('loading'); },
+  get results() { return document.getElementById('results'); },
+  get errors() { return document.getElementById('errors'); },
+  get channelInput() { return document.getElementById('channelInput'); },
+  get limitSelect() { return document.getElementById('limitSelect'); }
+};
+
+// ===== UI状態管理ヘルパー =====
+
+/**
+ * ローディング状態を設定
+ * @param {boolean} isLoading - ローディング中かどうか
+ */
+function setLoadingState(isLoading) {
+  UI.fetchButton.disabled = isLoading;
+  UI.loading.toggleAttribute('hidden', !isLoading);
+}
+
+/**
+ * 出力エリアをクリア
+ */
+function clearOutputs() {
+  UI.results.textContent = '';
+  UI.errors.textContent = '';
+}
+
+/**
+ * 取得件数をパースして検証
+ * @param {string} value - select要素の値
+ * @returns {number} - 取得件数
+ */
+function parseLimit(value) {
+  const limitValue = parseInt(value, 10);
+  return Number.isFinite(limitValue) ? limitValue : DEFAULT_LIMIT;
+}
+
 // ===== ユーティリティ関数 =====
 
 /**
@@ -25,7 +81,7 @@ function fetchWithTimeout(url, timeout) {
     .catch(error => {
       // Abort エラーを分かりやすいメッセージに変換
       if (error.name === 'AbortError') {
-        throw new Error('タイムアウトしました');
+        throw new Error(ERROR_MESSAGES.TIMEOUT);
       }
       throw error;
     })
@@ -37,7 +93,7 @@ function fetchWithTimeout(url, timeout) {
  */
 function truncateTitle(title, maxLength = 30) {
   if (!title || title.length === 0) {
-    return 'チャンネル名不明';
+    return ERROR_MESSAGES.CHANNEL_NAME_UNKNOWN;
   }
 
   // サロゲートペアを考慮した文字列分割
@@ -62,7 +118,7 @@ function normalizeInput(input) {
 
   // 空行チェック
   if (trimmed.length === 0) {
-    return { success: false, error: '空行' };
+    return { success: false, error: ERROR_MESSAGES.EMPTY_LINE };
   }
 
   // UC... 形式の直接入力
@@ -78,23 +134,14 @@ function normalizeInput(input) {
 
   // 非対応形式
   if (trimmed.includes('@')) {
-    return {
-      success: false,
-      error: '@username 形式は非対応です。チャンネルID（UC...）を使用してください。'
-    };
+    return { success: false, error: ERROR_MESSAGES.INVALID_AT };
   }
 
   if (trimmed.includes('/c/')) {
-    return {
-      success: false,
-      error: '/c/ 形式は廃止されました。チャンネルID（UC...）を使用してください。'
-    };
+    return { success: false, error: ERROR_MESSAGES.INVALID_C };
   }
 
-  return {
-    success: false,
-    error: '不正な形式です。チャンネルID（UC...）または /channel/UC... を入力してください。'
-  };
+  return { success: false, error: ERROR_MESSAGES.INVALID_FORMAT };
 }
 
 // ===== CORS Proxy フェッチ（フォールバック対応）=====
@@ -107,7 +154,7 @@ function normalizeInput(input) {
  */
 async function fetchWithProxy(targetUrl, proxyIndex = 0) {
   if (proxyIndex >= PROXY_CONFIG.length) {
-    throw new Error('全てのCORS Proxyが利用できません。時間をおいて再試行してください。');
+    throw new Error(ERROR_MESSAGES.PROXY_UNAVAILABLE);
   }
 
   const proxy = PROXY_CONFIG[proxyIndex];
@@ -139,6 +186,31 @@ async function fetchWithProxy(targetUrl, proxyIndex = 0) {
 // ===== RSS 取得・パース =====
 
 /**
+ * XMLノードからテキストを取得するヘルパー
+ * @param {Element} parent - 親要素
+ * @param {string} selector - セレクタ
+ * @param {string} fallback - デフォルト値
+ * @returns {string} - テキスト内容
+ */
+function getNodeText(parent, selector, fallback = '') {
+  return parent.querySelector(selector)?.textContent || fallback;
+}
+
+/**
+ * XMLエントリーを動画オブジェクトに変換
+ * @param {Element} entry - エントリー要素
+ * @returns {{ url: string, title: string, published: string }}
+ */
+function entryToVideo(entry) {
+  const videoId = getNodeText(entry, 'videoId');
+  return {
+    url: `https://www.youtube.com/watch?v=${videoId}`,
+    title: getNodeText(entry, 'title', ERROR_MESSAGES.TITLE_UNKNOWN),
+    published: getNodeText(entry, 'published')
+  };
+}
+
+/**
  * チャンネルの動画情報を取得
  * @param {string} channelId - チャンネルID
  * @param {number} limit - 取得件数
@@ -157,36 +229,26 @@ async function fetchChannelVideos(channelId, limit) {
     // パースエラーチェック
     const parserError = doc.querySelector('parsererror');
     if (parserError) {
-      throw new Error('Invalid XML format');
+      throw new Error(ERROR_MESSAGES.INVALID_XML);
     }
 
     // チャンネルID検証（セキュリティ: RSS改ざん対策）
     const feedChannelId = doc.querySelector('yt\\:channelId')?.textContent;
     if (feedChannelId && feedChannelId !== channelId) {
-      throw new Error('要求したチャンネルとRSSの発信元が一致しません');
+      throw new Error(ERROR_MESSAGES.CHANNEL_MISMATCH);
     }
 
     // チャンネルタイトル取得
-    const channelTitle = doc.querySelector('feed > title')?.textContent || 'チャンネル名不明';
+    const channelTitle = getNodeText(doc, 'feed > title', ERROR_MESSAGES.CHANNEL_NAME_UNKNOWN);
 
-    // 動画エントリー取得
+    // 動画エントリー取得（共通パーサ使用）
     const entries = Array.from(doc.querySelectorAll('entry'));
-    const videos = entries.slice(0, limit).map(entry => {
-      const videoId = entry.querySelector('videoId')?.textContent || '';
-      const title = entry.querySelector('title')?.textContent || 'タイトル不明';
-      const published = entry.querySelector('published')?.textContent || '';
-
-      return {
-        url: `https://www.youtube.com/watch?v=${videoId}`,
-        title: title,
-        published: published
-      };
-    });
+    const videos = entries.slice(0, limit).map(entryToVideo);
 
     // URL検証（セキュリティ: 不正なURL検出）
     const urlsAreYoutube = videos.every(v => v.url.startsWith('https://www.youtube.com/watch?v='));
     if (!urlsAreYoutube) {
-      throw new Error('不正な動画URLを検出しました');
+      throw new Error(ERROR_MESSAGES.INVALID_URL);
     }
 
     return { videos, channelTitle };
@@ -202,8 +264,6 @@ async function fetchChannelVideos(channelId, limit) {
  * 結果を表示
  */
 function renderResults(resultsData) {
-  const resultsContainer = document.getElementById('results');
-
   resultsData.forEach(({ channelTitle, videos }) => {
     // チャンネルセクション作成
     const section = document.createElement('div');
@@ -235,7 +295,7 @@ function renderResults(resultsData) {
     const datesBlock = createOutputBlock('Published Dates', aggregated.dates.join('\n'));
     section.appendChild(datesBlock);
 
-    resultsContainer.appendChild(section);
+    UI.results.appendChild(section);
   });
 }
 
@@ -260,11 +320,37 @@ function createOutputBlock(title, content) {
 }
 
 /**
+ * エラー要素を作成（コンポーネント化）
+ * @param {{ message: string, prefix?: string }} options - メッセージとプレフィックス
+ * @returns {HTMLElement} - エラー要素
+ */
+function createErrorItem({ message, prefix = 'エラー: ' }) {
+  const errorItem = document.createElement('div');
+  errorItem.className = 'error-item';
+
+  const strong = document.createElement('strong');
+  strong.textContent = prefix;
+  errorItem.appendChild(strong);
+
+  errorItem.appendChild(document.createTextNode(message));
+  return errorItem;
+}
+
+/**
+ * エラーメッセージを生成（グループ化対応）
+ * @param {{ error: string, inputs: Array, count: number }} group - エラーグループ
+ * @returns {string} - メッセージ
+ */
+function formatErrorMessage(group) {
+  return group.count > 1
+    ? `${group.error} (${group.count}件)`
+    : `${group.inputs[0]} - ${group.error}`;
+}
+
+/**
  * エラーを表示（同一エラーを集約）
  */
 function renderErrors(errorsData) {
-  const errorsContainer = document.getElementById('errors');
-
   // 同一エラーメッセージをグループ化
   const grouped = errorsData.reduce((acc, err) => {
     const key = err.error;
@@ -277,50 +363,43 @@ function renderErrors(errorsData) {
   }, {});
 
   // グループごとに表示
-  Object.values(grouped).forEach(({ error, inputs, count }) => {
-    const errorItem = document.createElement('div');
-    errorItem.className = 'error-item';
-
-    const strong = document.createElement('strong');
-    strong.textContent = 'エラー: ';
-    errorItem.appendChild(strong);
-
-    // 件数が2件以上なら件数表示、1件なら入力値表示
-    if (count > 1) {
-      const message = document.createTextNode(`${error} (${count}件)`);
-      errorItem.appendChild(message);
-    } else {
-      const message = document.createTextNode(`${inputs[0]} - ${error}`);
-      errorItem.appendChild(message);
-    }
-
-    errorsContainer.appendChild(errorItem);
+  Object.values(grouped).forEach(group => {
+    const errorElement = createErrorItem({ message: formatErrorMessage(group) });
+    UI.errors.appendChild(errorElement);
   });
+}
+
+/**
+ * グローバルエラーを表示
+ * @param {Error} error - エラーオブジェクト
+ */
+function showGlobalError(error) {
+  UI.errors.textContent = '';
+  UI.errors.appendChild(createErrorItem({ message: error.message }));
 }
 
 // ===== メインロジック =====
 
 /**
- * Promise pool: 同時実行数を制限しながらタスクを実行
+ * Promise pool: 同時実行数を制限しながらタスクを実行（順序保証）
  * @param {Array} items - 処理対象の配列
  * @param {number} limit - 同時実行数
  * @param {Function} task - 各アイテムに対する処理
- * @returns {Promise<Array>} - 結果の配列
+ * @returns {Promise<Array>} - 結果の配列（入力順を保持）
  */
 async function runWithLimit(items, limit, task) {
-  const queue = [...items];
-  const results = [];
+  const results = new Array(items.length);
+  let cursor = 0;
 
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (queue.length) {
-      const item = queue.shift();
-      if (item) {
-        results.push(await task(item));
-      }
+  async function worker() {
+    while (cursor < items.length) {
+      const index = cursor++;
+      results[index] = await task(items[index]);
     }
-  });
+  }
 
-  await Promise.all(workers);
+  const workerCount = Math.min(limit, items.length);
+  await Promise.all(Array.from({ length: workerCount }, worker));
   return results;
 }
 
@@ -336,7 +415,7 @@ function parseChannelInput(rawInput) {
     .filter(line => line.length > 0);
 
   if (lines.length === 0) {
-    throw new Error('チャンネルIDまたはURLを入力してください。');
+    throw new Error(ERROR_MESSAGES.INPUT_REQUIRED);
   }
 
   const normalized = lines.map(line => ({
@@ -359,48 +438,33 @@ function parseChannelInput(rawInput) {
 async function runChannelFetches(validInputs, limit) {
   const fetchResults = await runWithLimit(validInputs, CONCURRENCY_LIMIT, async (input) => {
     try {
-      const data = await fetchChannelVideos(input.channelId, limit);
-      return { success: true, data };
+      return { success: true, data: await fetchChannelVideos(input.channelId, limit) };
     } catch (error) {
       return { success: false, error: error.message, input: input.original };
     }
   });
 
-  const results = [];
-  const errors = [];
-
-  fetchResults.forEach(result => {
+  // 成功/失敗を1回のreduceで仕分け
+  return fetchResults.reduce((acc, result) => {
     if (result.success) {
-      results.push(result.data);
+      acc.results.push(result.data);
     } else {
-      errors.push({ input: result.input, error: result.error });
+      acc.errors.push({ input: result.input, error: result.error });
     }
-  });
-
-  return { results, errors };
+    return acc;
+  }, { results: [], errors: [] });
 }
 
 /**
  * 取得ボタンのハンドラー
  */
 async function handleFetch() {
-  const fetchButton = document.getElementById('fetchButton');
-  const loadingDiv = document.getElementById('loading');
-  const resultsContainer = document.getElementById('results');
-  const errorsContainer = document.getElementById('errors');
-  const channelInput = document.getElementById('channelInput').value;
+  const channelInput = UI.channelInput.value;
+  const limit = parseLimit(UI.limitSelect.value);
 
-  // parseInt に基数を指定、NaN チェック
-  const limitValue = parseInt(document.getElementById('limitSelect').value, 10);
-  const limit = Number.isFinite(limitValue) ? limitValue : DEFAULT_LIMIT;
-
-  // 状態リセット
-  resultsContainer.textContent = '';
-  errorsContainer.textContent = '';
-
-  // ボタン無効化、ローディング表示（aria-live対応）
-  fetchButton.disabled = true;
-  loadingDiv.removeAttribute('hidden');
+  // 状態リセットとローディング表示
+  clearOutputs();
+  setLoadingState(true);
 
   try {
     // 入力をパース
@@ -427,27 +491,20 @@ async function handleFetch() {
 
     // 全て失敗の場合（実際にフェッチした場合のみ）
     if (valid.length > 0 && results.length === 0 && allErrors.length > 0) {
-      const errorMsg = document.createElement('div');
-      errorMsg.className = 'error-item';
-      errorMsg.textContent = '全てのチャンネルで取得に失敗しました。入力内容を確認してください。';
-      errorsContainer.insertBefore(errorMsg, errorsContainer.firstChild);
+      const allFailedMsg = createErrorItem({ message: ERROR_MESSAGES.ALL_FAILED });
+      UI.errors.insertBefore(allFailedMsg, UI.errors.firstChild);
     }
 
   } catch (error) {
     // 全体エラー
-    errorsContainer.textContent = '';
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-item';
-    errorDiv.textContent = `エラー: ${error.message}`;
-    errorsContainer.appendChild(errorDiv);
+    showGlobalError(error);
 
   } finally {
-    // ボタン有効化、ローディング非表示（aria-live対応）
-    fetchButton.disabled = false;
-    loadingDiv.setAttribute('hidden', '');
+    // ボタン有効化、ローディング非表示
+    setLoadingState(false);
   }
 }
 
 // ===== イベントリスナー =====
 
-document.getElementById('fetchButton').addEventListener('click', handleFetch);
+UI.fetchButton.addEventListener('click', handleFetch);

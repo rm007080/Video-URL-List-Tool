@@ -88,8 +88,25 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.loading {
+/* 情報ボックス内のリスト */
+.info-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 10px 0 0;
+}
+
+.info-list li {
+  margin: 4px 0;
+}
+
+/* 共通の上マージンユーティリティ */
+.loading,
+.errors,
+.results {
   margin-top: 20px;
+}
+
+.loading {
   text-align: center;
 }
 
@@ -108,10 +125,6 @@ button:disabled {
   100% { transform: rotate(360deg); }
 }
 
-.errors {
-  margin-top: 20px;
-}
-
 .error-item {
   background-color: #ffebee;
   border-left: 4px solid #f44336;
@@ -122,10 +135,6 @@ button:disabled {
 
 .error-item strong {
   color: #c62828;
-}
-
-.results {
-  margin-top: 20px;
 }
 
 .channel-section {
