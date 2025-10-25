@@ -160,6 +160,12 @@ async function fetchChannelVideos(channelId, limit) {
       throw new Error('Invalid XML format');
     }
 
+    // チャンネルID検証（セキュリティ: RSS改ざん対策）
+    const feedChannelId = doc.querySelector('yt\\:channelId')?.textContent;
+    if (feedChannelId && feedChannelId !== channelId) {
+      throw new Error('要求したチャンネルとRSSの発信元が一致しません');
+    }
+
     // チャンネルタイトル取得
     const channelTitle = doc.querySelector('feed > title')?.textContent || 'チャンネル名不明';
 
@@ -176,6 +182,12 @@ async function fetchChannelVideos(channelId, limit) {
         published: published
       };
     });
+
+    // URL検証（セキュリティ: 不正なURL検出）
+    const urlsAreYoutube = videos.every(v => v.url.startsWith('https://www.youtube.com/watch?v='));
+    if (!urlsAreYoutube) {
+      throw new Error('不正な動画URLを検出しました');
+    }
 
     return { videos, channelTitle };
 
@@ -203,16 +215,24 @@ function renderResults(resultsData) {
     header.textContent = truncateTitle(channelTitle);
     section.appendChild(header);
 
+    // 配列を1回だけ走査して3つの文字列を生成（パフォーマンス改善）
+    const aggregated = videos.reduce((acc, video) => {
+      acc.urls.push(video.url);
+      acc.titles.push(video.title);
+      acc.dates.push(video.published);
+      return acc;
+    }, { urls: [], titles: [], dates: [] });
+
     // URLs ブロック
-    const urlsBlock = createOutputBlock('URLs', videos.map(v => v.url).join('\n'));
+    const urlsBlock = createOutputBlock('URLs', aggregated.urls.join('\n'));
     section.appendChild(urlsBlock);
 
     // Titles ブロック
-    const titlesBlock = createOutputBlock('Titles', videos.map(v => v.title).join('\n'));
+    const titlesBlock = createOutputBlock('Titles', aggregated.titles.join('\n'));
     section.appendChild(titlesBlock);
 
     // Published Dates ブロック
-    const datesBlock = createOutputBlock('Published Dates', videos.map(v => v.published).join('\n'));
+    const datesBlock = createOutputBlock('Published Dates', aggregated.dates.join('\n'));
     section.appendChild(datesBlock);
 
     resultsContainer.appendChild(section);
@@ -240,12 +260,24 @@ function createOutputBlock(title, content) {
 }
 
 /**
- * エラーを表示
+ * エラーを表示（同一エラーを集約）
  */
 function renderErrors(errorsData) {
   const errorsContainer = document.getElementById('errors');
 
-  errorsData.forEach(({ input, error }) => {
+  // 同一エラーメッセージをグループ化
+  const grouped = errorsData.reduce((acc, err) => {
+    const key = err.error;
+    if (!acc[key]) {
+      acc[key] = { error: err.error, inputs: [], count: 0 };
+    }
+    acc[key].inputs.push(err.input);
+    acc[key].count += 1;
+    return acc;
+  }, {});
+
+  // グループごとに表示
+  Object.values(grouped).forEach(({ error, inputs, count }) => {
     const errorItem = document.createElement('div');
     errorItem.className = 'error-item';
 
@@ -253,14 +285,100 @@ function renderErrors(errorsData) {
     strong.textContent = 'エラー: ';
     errorItem.appendChild(strong);
 
-    const message = document.createTextNode(`${input} - ${error}`);
-    errorItem.appendChild(message);
+    // 件数が2件以上なら件数表示、1件なら入力値表示
+    if (count > 1) {
+      const message = document.createTextNode(`${error} (${count}件)`);
+      errorItem.appendChild(message);
+    } else {
+      const message = document.createTextNode(`${inputs[0]} - ${error}`);
+      errorItem.appendChild(message);
+    }
 
     errorsContainer.appendChild(errorItem);
   });
 }
 
 // ===== メインロジック =====
+
+/**
+ * Promise pool: 同時実行数を制限しながらタスクを実行
+ * @param {Array} items - 処理対象の配列
+ * @param {number} limit - 同時実行数
+ * @param {Function} task - 各アイテムに対する処理
+ * @returns {Promise<Array>} - 結果の配列
+ */
+async function runWithLimit(items, limit, task) {
+  const queue = [...items];
+  const results = [];
+
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (queue.length) {
+      const item = queue.shift();
+      if (item) {
+        results.push(await task(item));
+      }
+    }
+  });
+
+  await Promise.all(workers);
+  return results;
+}
+
+/**
+ * 入力をパースしてチャンネルIDを抽出
+ * @param {string} rawInput - 生の入力文字列
+ * @returns {{ valid: Array, invalid: Array }}
+ */
+function parseChannelInput(rawInput) {
+  const lines = rawInput
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0);
+
+  if (lines.length === 0) {
+    throw new Error('チャンネルIDまたはURLを入力してください。');
+  }
+
+  const normalized = lines.map(line => ({
+    original: line,
+    ...normalizeInput(line)
+  }));
+
+  return {
+    valid: normalized.filter(n => n.success),
+    invalid: normalized.filter(n => !n.success)
+  };
+}
+
+/**
+ * 複数チャンネルから動画情報を取得（Promise pool使用）
+ * @param {Array} validInputs - 有効な入力の配列
+ * @param {number} limit - 取得件数
+ * @returns {Promise<{ results: Array, errors: Array }>}
+ */
+async function runChannelFetches(validInputs, limit) {
+  const fetchResults = await runWithLimit(validInputs, CONCURRENCY_LIMIT, async (input) => {
+    try {
+      const data = await fetchChannelVideos(input.channelId, limit);
+      return { success: true, data };
+    } catch (error) {
+      return { success: false, error: error.message, input: input.original };
+    }
+  });
+
+  const results = [];
+  const errors = [];
+
+  fetchResults.forEach(result => {
+    if (result.success) {
+      results.push(result.data);
+    } else {
+      errors.push({ input: result.input, error: result.error });
+    }
+  });
+
+  return { results, errors };
+}
 
 /**
  * 取得ボタンのハンドラー
@@ -280,58 +398,22 @@ async function handleFetch() {
   resultsContainer.textContent = '';
   errorsContainer.textContent = '';
 
-  // ボタン無効化、ローディング表示
+  // ボタン無効化、ローディング表示（aria-live対応）
   fetchButton.disabled = true;
-  loadingDiv.style.display = 'block';
+  loadingDiv.removeAttribute('hidden');
 
   try {
-    // 空行スキップ
-    const lines = channelInput
-      .split('\n')
-      .map(line => line.trim())
-      .filter(line => line.length > 0);
+    // 入力をパース
+    const { valid, invalid } = parseChannelInput(channelInput);
 
-    if (lines.length === 0) {
-      throw new Error('チャンネルIDまたはURLを入力してください。');
-    }
-
-    // 入力正規化
-    const normalized = lines.map(line => ({
-      original: line,
-      ...normalizeInput(line)
-    }));
-
-    // エラー入力を分離
-    const validInputs = normalized.filter(n => n.success);
-    const invalidInputs = normalized.filter(n => !n.success);
-
-    // 並列実行を制限（同時3件まで）
-    const results = [];
-    const errors = [];
-
-    for (let i = 0; i < validInputs.length; i += CONCURRENCY_LIMIT) {
-      const batch = validInputs.slice(i, i + CONCURRENCY_LIMIT);
-      const batchPromises = batch.map(input =>
-        fetchChannelVideos(input.channelId, limit)
-          .then(data => ({ success: true, data, input: input.original }))
-          .catch(error => ({ success: false, error: error.message, input: input.original }))
-      );
-
-      const batchResults = await Promise.all(batchPromises);
-
-      batchResults.forEach(result => {
-        if (result.success) {
-          results.push(result.data);
-        } else {
-          errors.push({ input: result.input, error: result.error });
-        }
-      });
-    }
+    // チャンネル情報を取得（Promise pool使用）
+    const { results, errors } = await runChannelFetches(valid, limit);
 
     // 不正な入力をエラーに追加
-    invalidInputs.forEach(input => {
-      errors.push({ input: input.original, error: input.error });
-    });
+    const allErrors = [
+      ...errors,
+      ...invalid.map(input => ({ input: input.original, error: input.error }))
+    ];
 
     // 結果表示
     if (results.length > 0) {
@@ -339,12 +421,12 @@ async function handleFetch() {
     }
 
     // エラー表示
-    if (errors.length > 0) {
-      renderErrors(errors);
+    if (allErrors.length > 0) {
+      renderErrors(allErrors);
     }
 
-    // 全て失敗の場合
-    if (results.length === 0 && errors.length > 0) {
+    // 全て失敗の場合（実際にフェッチした場合のみ）
+    if (valid.length > 0 && results.length === 0 && allErrors.length > 0) {
       const errorMsg = document.createElement('div');
       errorMsg.className = 'error-item';
       errorMsg.textContent = '全てのチャンネルで取得に失敗しました。入力内容を確認してください。';
@@ -360,9 +442,9 @@ async function handleFetch() {
     errorsContainer.appendChild(errorDiv);
 
   } finally {
-    // ボタン有効化、ローディング非表示
+    // ボタン有効化、ローディング非表示（aria-live対応）
     fetchButton.disabled = false;
-    loadingDiv.style.display = 'none';
+    loadingDiv.setAttribute('hidden', '');
   }
 }
 

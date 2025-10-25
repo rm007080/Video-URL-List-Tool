@@ -157,12 +157,12 @@ button:disabled {
 
 .output-block pre {
   background-color: #263238;
-  color: #aed581;
+  color: #f4ffd7;
   padding: 15px;
   border-radius: 4px;
   overflow-x: auto;
   font-family: 'Courier New', monospace;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
   white-space: pre-wrap;
   word-wrap: break-word;
