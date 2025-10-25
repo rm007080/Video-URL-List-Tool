@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube List Tool - 動画情報取得</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>YouTube List Tool</h1>
+            <p class="subtitle">チャンネルから動画の URL・タイトル・公開日を取得</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <h2>1. チャンネルを指定</h2>
+                <label for="channelInput">
+                    チャンネルID または URL（1行1件）
+                    <span class="hint">例: UCxxxxxxxx または https://www.youtube.com/channel/UCxxxxxxxx</span>
+                </label>
+                <textarea
+                    id="channelInput"
+                    placeholder="UCxxxxxxxx&#10;https://www.youtube.com/channel/UCyyyyyyyy&#10;UCzzzzzzzz"
+                    rows="5"
+                ></textarea>
+            </section>
+
+            <section class="settings-section">
+                <h2>2. 取得設定</h2>
+                <div class="settings-group">
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="fetchMode" value="all" checked>
+                            全件取得（RSS フィードの全動画）
+                        </label>
+                        <label>
+                            <input type="radio" name="fetchMode" value="latest">
+                            最新 N 件のみ
+                        </label>
+                    </div>
+                    <div class="number-input-group">
+                        <label for="maxVideos">取得件数:</label>
+                        <input
+                            type="number"
+                            id="maxVideos"
+                            value="15"
+                            min="1"
+                            max="50"
+                            disabled
+                        >
+                    </div>
+                </div>
+            </section>
+
+            <section class="action-section">
+                <button id="fetchButton" class="fetch-button">動画情報を取得</button>
+                <div id="loadingIndicator" class="loading" style="display: none;">
+                    <span class="spinner"></span>
+                    取得中...
+                </div>
+            </section>
+
+            <section class="output-section" id="outputSection" style="display: none;">
+                <h2>3. 取得結果</h2>
+
+                <div class="output-block">
+                    <div class="output-header">
+                        <h3># URLs</h3>
+                        <button class="copy-button" data-target="urlsOutput">コピー</button>
+                    </div>
+                    <pre id="urlsOutput" class="output-content"></pre>
+                </div>
+
+                <div class="output-block">
+                    <div class="output-header">
+                        <h3># Titles</h3>
+                        <button class="copy-button" data-target="titlesOutput">コピー</button>
+                    </div>
+                    <pre id="titlesOutput" class="output-content"></pre>
+                </div>
+
+                <div class="output-block">
+                    <div class="output-header">
+                        <h3># Published Dates</h3>
+                        <button class="copy-button" data-target="datesOutput">コピー</button>
+                    </div>
+                    <pre id="datesOutput" class="output-content"></pre>
+                </div>
+            </section>
+
+            <section class="error-section" id="errorSection" style="display: none;">
+                <div class="error-message" id="errorMessage"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>NotebookLM などにコピー&ペーストしてご利用ください</p>
+            <p class="note">※ CORS 対策のため、ローカルサーバーで起動してください（README.md 参照）</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
