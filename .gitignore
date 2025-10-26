@@ -1,6 +1,9 @@
 # Claude Code 設定ファイル
 .claude/
 
+# スクリーンショット（オプション）
+screenshots/
+
 # OS生成ファイル
 .DS_Store
 Thumbs.db

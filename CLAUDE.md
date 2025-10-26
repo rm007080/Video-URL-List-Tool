@@ -53,3 +53,7 @@ https://www.youtube.com/watch?v=def456
 
 ## 最終確認ルール（コミット前）
 - 生成された差分を表示 → ユーザー承認 → ユーザーがローカルで `git add/commit` を実行 → PR を作成してレビューの上でマージ（必要に応じて）という流れを守る。
+
+## MUST - Critical Rules
+- MUST WindowsのパスはUbuntuのマウントパスに変換すること  
+- 例: "C:\Users\user1\Pictures\test.jpg" → "/mnt/c/Users/user1/Pictures/test.jpg"
