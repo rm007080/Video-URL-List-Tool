@@ -1,7 +1,7 @@
-# CLAUDE.md — 開発アシスタント用ルール（MVP: YouTube URL list tool）
+# CLAUDE.md — 開発アシスタント用ルール（MVP: Video URL List Tool）
 
 ## プロジェクトの目的（短く）
-指定した YouTube チャンネルから動画の URL・タイトル・公開日を取得し、URLs / Titles / Published Dates を改行区切りのコードブロックで出力する軽量ツールを作る。NotebookLM 等に貼って使える形式を目的とする。
+YouTube チャンネルに対応した動画情報取得ツール。指定したチャンネルから動画の URL・タイトル・公開日を取得し、URLs / Titles / Published Dates を改行区切りのコードブロックで出力する。NotebookLM 等に貼って使える形式を目的とする。
 
 ## MVP（最小実装） — そのまま実行できる要件
 - 入力：1行1件でチャンネルID（UC...）またはチャンネルURL を受け付ける。

@@ -1,10 +1,10 @@
-# YouTube URL List Tool
+# Video URL List Tool
 
-指定した YouTube チャンネルから動画の URL・タイトル・公開日を取得し、NotebookLM 等に貼り付け可能な形式で出力する軽量ツールです。
+YouTube チャンネルに対応した動画情報取得ツール。指定したチャンネルから動画の URL・タイトル・公開日を取得し、NotebookLM 等に貼り付け可能な形式で出力します。
 
 ## 機能
 
-- YouTube チャンネルから動画情報（URL/タイトル/公開日）を取得
+- YouTube チャンネルの動画情報（URL/タイトル/公開日）を取得
 - 最新5〜15件まで選択可能（YouTube RSS の仕様により最大15件）
 - 複数チャンネルの一括取得に対応
 - チャンネルごとに結果を分割表示
@@ -165,7 +165,7 @@ MIT License
 .
 ├── index.html              # メインUIページ
 ├── style.css               # スタイリング
-├── app.js                  # コアロジック
+├── app.js                  # コアロジック（RSS取得・解析）
 ├── README.md               # このファイル
 ├── LICENSE                 # ライセンス
 ├── CLAUDE.md               # 開発ルール

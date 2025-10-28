@@ -1,4 +1,4 @@
-# YouTube URL List Tool - 最終実装計画 v3
+# Video URL List Tool - 最終実装計画 v3
 
 **作成日**: 2025-10-25
 **ステータス**: Codex レビュー完了、実装準備完了
@@ -22,7 +22,7 @@
 ## プロジェクト概要
 
 ### 目的
-指定した YouTube チャンネルから動画の URL・タイトル・公開日を取得し、NotebookLM 等に貼り付け可能な形式で出力する軽量ツール。
+YouTube チャンネルに対応した動画情報取得ツール。指定したチャンネルから動画の URL・タイトル・公開日を取得し、NotebookLM 等に貼り付け可能な形式で出力する。
 
 ### MVP 要件
 - **入力形式**: チャンネルID（`UC...`）またはチャンネルURL（`/channel/UC...`）
@@ -89,15 +89,15 @@ YouTubeListTool/
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube URL List Tool</title>
+  <title>Video URL List Tool</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>YouTube URL List Tool</h1>
+    <h1>Video URL List Tool</h1>
 
     <p class="description">
-      YouTube チャンネルから動画の URL・タイトル・公開日を取得します（最新15件まで）
+      YouTube チャンネルに対応した動画URL・タイトル・公開日の取得ツール（最新15件まで）
     </p>
 
     <div class="info-box">
@@ -810,13 +810,13 @@ cd /mnt/c/Users/littl/app-dev/05_YouTubeListTool/YouTubeListTool
 既存の `README.md` を以下の内容で更新してください：
 
 ```markdown
-# YouTube URL List Tool
+# Video URL List Tool
 
-指定した YouTube チャンネルから動画の URL・タイトル・公開日を取得し、NotebookLM 等に貼り付け可能な形式で出力する軽量ツールです。
+YouTube チャンネルに対応した動画情報取得ツール。指定したチャンネルから動画の URL・タイトル・公開日を取得し、NotebookLM 等に貼り付け可能な形式で出力します。
 
 ## 機能
 
-- YouTube チャンネルから動画情報（URL/タイトル/公開日）を取得
+- YouTube チャンネルの動画情報（URL/タイトル/公開日）を取得
 - 最新5〜15件まで選択可能（YouTube RSS の仕様により最大15件）
 - 複数チャンネルの一括取得に対応
 - チャンネルごとに結果を分割表示
