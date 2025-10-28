@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "mcp__codex__codex",
-      "mcp__serena__write_memory"
+      "mcp__serena__write_memory",
+      "WebFetch(domain:corsproxy.io)"
     ],
     "deny": [],
     "ask": []
