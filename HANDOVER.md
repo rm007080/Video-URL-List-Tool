@@ -1,442 +1,671 @@
-# 🔄 YouTubeListTool プロジェクト引き継ぎドキュメント
+# 🔄 Video URL List Tool - 引き継ぎドキュメント
 
-最終更新日: 2025-10-26
+**最終更新日**: 2025-10-28
+**プロジェクト状態**: 本番環境デプロイ済み（Cloudflare Pages）
+**バージョン**: 1.0.0
 
 ---
 
-## 📋 プロジェクト概要
+## 📋 目次
 
-### プロジェクト名
-**YouTube List Tool** - YouTube チャンネルから動画情報を取得するツール
+1. [プロジェクト概要](#プロジェクト概要)
+2. [現在の状態](#現在の状態)
+3. [重要な決定事項と経緯](#重要な決定事項と経緯)
+4. [技術構成](#技術構成)
+5. [デプロイ環境](#デプロイ環境)
+6. [重要な制約事項](#重要な制約事項)
+7. [セキュリティ・コンプライアンス](#セキュリティコンプライアンス)
+8. [今後の課題と将来計画](#今後の課題と将来計画)
+9. [トラブルシューティング](#トラブルシューティング)
+10. [参考リンク](#参考リンク)
+
+---
+
+## プロジェクト概要
 
 ### 目的
-YouTube チャンネルの動画情報（URL、タイトル、公開日）を取得し、NotebookLM などにコピー&ペーストしやすい形式で出力する軽量ツール。
+YouTube チャンネルに対応した動画情報取得ツール。指定したチャンネルから動画の URL・タイトル・公開日を取得し、NotebookLM 等に貼り付け可能な形式で出力する。
 
-### 本番URL
-デプロイ済み（Cloudflare Pages）
-- Production: `https://youtube-list-tool.pages.dev`（または設定したカスタムドメイン）
+### ユースケース
+- YouTube チャンネルの動画リストを取得してNotebookLMに貼り付け
+- 複数チャンネルの最新動画を一括取得
+- 個人利用・教育目的・非商用利用
 
-### リポジトリ
-- GitHub: `rm007080/YouTubeListTool`
-- メインブランチ: `main`
-- 開発ブランチ: `レビューなし実装`（マージ済みまたは運用中）
-
----
-
-## 🏗️ 技術スタック
-
-### フロントエンド
-- **Pure HTML/CSS/JavaScript**（フレームワーク不使用）
-- ブラウザネイティブAPI（Fetch API, DOMParser, Clipboard API）
-- アクセシビリティ対応（ARIA属性、WCAG AAA準拠）
-
-### インフラ
-- **Cloudflare Pages**（静的サイトホスティング）
-- **GitHub Actions**（自動デプロイ）
-- **CORS Proxy**: `allorigins.win`, `corsproxy.io`（外部依存）
-
-### データソース
-- **YouTube RSS Feed**（`https://www.youtube.com/feeds/videos.xml?channel_id=...`）
-- APIキー不要
-- 最新15件程度の動画情報を取得可能（YouTube仕様）
+### スコープ（MVP）
+- ✅ チャンネルID（UC...）またはチャンネルURL入力
+- ✅ 最新5〜15件の動画情報取得
+- ✅ RSS経由でのデータ取得（YouTube Data API不使用）
+- ✅ URLs / Titles / Published Dates のコードブロック出力
+- ❌ @username形式は非対応（YouTube Data API が必要）
+- ❌ 16件目以降の取得は不可（YouTube RSS の仕様）
 
 ---
 
-## 📂 ディレクトリ構造
+## 現在の状態
 
+### デプロイ状況
+- **環境**: Cloudflare Pages（本番環境）
+- **公開状態**: 一般公開済み（SNS共有可能）
+- **リポジトリ**: Public
+- **ビルド**: 不要（Pure HTML/CSS/JavaScript）
+
+### 最新の変更履歴
+
+#### 2025-10-28: アプリ名称変更
+- **変更内容**: `YouTube URL List Tool` → `Video URL List Tool`
+- **理由**: Googleブランディングガイドライン準拠（商標権対策）
+  > アプリケーション全体の名称に「YouTube」や「YT」「You-Tube」などを組み込むことは禁止
+  > 出典: https://developers.google.com/youtube/terms/branding-guidelines?hl=ja
+- **影響ファイル**: index.html, README.md, CLAUDE.md, IMPLEMENTATION_PLAN.md
+- **説明文の変更**: 「YouTube チャンネルに対応した」（間接的な表現は許可されている）
+
+#### 2025-10-28: プライバシーポリシー追加
+- **追加場所**: README.md (利用規約と注意事項 > プライバシーに関する重要な情報)
+- **追加場所**: index.html (黄色の警告ボックス)
+- **主な内容**:
+  - 送信される情報: チャンネルID、IPアドレス、アクセス時刻、ブラウザ情報
+  - 送信先: allorigins.win, corsproxy.io, YouTube RSS
+  - 本アプリ自体はデータを保存しないことを明記
+  - ボタンクリック = 同意とみなす旨を明記
+
+#### 2025-10-28: CORS Proxy の制限情報を明記
+- **追加場所**: README.md (制限事項 > CORS Proxy の制限)
+- **主な内容**:
+  - allorigins.win: MIT ライセンス、利用規約・レート制限は不明
+  - corsproxy.io: 開発用途は無料、「production site」の定義は曖昧
+  - 本ツールは非商用の個人プロジェクトとして運用中
+
+#### 2025-10-28: 利用規約と免責事項追加
+- **追加場所**: README.md (利用規約と注意事項)
+- **主な内容**:
+  - 個人利用・教育目的限定
+  - 商用利用禁止
+  - YouTube利用規約への準拠を要求
+  - 免責事項（無保証、サービス停止リスク、損害責任の免責）
+
+### 主要ファイル
 ```
-YouTubeListTool/
-├── index.html              # メインHTML（UIとフォーム）
-├── app.js                  # JavaScriptロジック（16KB、512行）
-├── style.css               # スタイルシート（3KB）
+.
+├── index.html              # メインUIページ
+├── style.css               # スタイリング
+├── app.js                  # コアロジック（511行）
 ├── README.md               # ユーザー向けドキュメント
-├── CLAUDE.md               # 開発ルール（必読）
-├── HANDOVER.md             # 本ドキュメント
-├── LICENSE                 # MITライセンス
-├── .gitignore              # Git除外設定
-├── .git/                   # Gitリポジトリ
-├── .claude/                # Claude Code設定（Git除外）
-└── screenshots/            # スクリーンショット保存用（Git除外）
+├── CLAUDE.md               # 開発ルール（AI用）
+├── IMPLEMENTATION_PLAN.md  # 実装計画
+├── HANDOVER.md             # このファイル（引き継ぎドキュメント）
+└── LICENSE                 # MIT License
 ```
 
 ---
 
-## 🎯 実装済み機能
+## 重要な決定事項と経緯
 
-### コア機能
-- [x] チャンネルID/URLからの動画情報取得
-- [x] 複数チャンネル一括取得（1行1件）
-- [x] 取得件数指定（5件/10件/15件）
-- [x] URLs/Titles/Published Datesの整形出力
-- [x] ワンクリックコピー機能
+### 1. 名称変更：YouTube → Video
 
-### 技術的な特徴
-- [x] **CORS対策**: 複数プロキシのフォールバック機能
-- [x] **セキュリティ**: RSS改ざん検証（チャンネルID/URL検証）
-- [x] **パフォーマンス**: Promise pool（同時3件制限）、配列走査最適化
-- [x] **エラーハンドリング**: エラー集約、同一エラーのグルーピング
-- [x] **アクセシビリティ**: aria-live、WCAG AAA対応、スクリーンリーダー対応
-- [x] **コード品質**: UI要素キャッシュ、エラーメッセージ定数化、関数分割
+**決定**: アプリ名に「YouTube」を含めない
 
-### UI/UX
-- [x] レスポンシブデザイン
-- [x] ローディングインジケーター
-- [x] エラー表示（ユーザーフレンドリー）
-- [x] セマンティックHTML（ul/li構造）
-
----
-
-## 🔧 重要な設計決定
-
-### 1. Pure JavaScript採用
 **理由**:
-- ビルドプロセス不要
-- 依存関係なし
-- デプロイが簡単
-- 学習コストが低い
+- Googleブランディングガイドライン違反のリスク
+- 商標権侵害の可能性
+
+**根拠**:
+> アプリケーション全体の名称に「YouTube」や「YT」「You-Tube」などを組み込むことは禁止
+> ただし、「YouTube に最適なアプリ」などの類似した表現を使用して、アプリが YouTube 向けであることや YouTube と連携することを言及することは可能
+
+**対応**:
+- アプリ名: `Video URL List Tool`
+- 説明文: 「YouTube チャンネルに対応した」（間接的な表現）
+- 技術的な説明（「YouTube RSS」「YouTube Data API」など）は変更不要
+
+### 2. YouTube Data API 不使用
+
+**決定**: YouTube RSS フィードを使用、YouTube Data API は使用しない（現時点）
+
+**理由**:
+- **APIキー不要**: バックエンドサーバーが不要
+- **シンプル**: Pure HTML/CSS/JavaScript のみで動作
+- **コスト**: 完全無料（APIクォータの心配なし）
+- **デプロイ**: 静的サイトとしてCloudflare Pagesで公開可能
+- **制約の受容**: 最新15件までという制限は許容範囲
 
 **トレードオフ**:
-- 大規模化には不向き
-- 型安全性なし
+- ❌ @username 形式の入力に対応できない
+- ❌ 16件以上の動画を取得できない
+- ❌ 動画の詳細情報（再生回数、いいね数など）を取得できない
 
-### 2. CORS Proxy依存
-**現状**: `allorigins.win` → `corsproxy.io` のフォールバック
+**将来的な課題**:
+- @username 形式に対応するには YouTube Data API が必要
+- その場合はバックエンド（Cloudflare Workers等）の構築が必須
+- 詳細は「YouTube Data API 導入計画」を参照
 
-**リスク**:
-- 外部サービス停止時に全機能停止
-- レート制限の可能性
-- プライバシー懸念（チャンネルIDが送信される）
+### 3. CORS Proxy の選択
 
-**将来の改善案**:
-- Cloudflare Workers で独自プロキシ実装（推奨）
-- YouTube Data API への移行（APIキー必要）
+**決定**: allorigins.win（プライマリ）+ corsproxy.io（フォールバック）
 
-### 3. エラーメッセージの定数化
-**実装箇所**: `app.js:14-28`
+**理由**:
+- ブラウザから直接YouTube RSSを取得できない（CORS制限）
+- 第三者のCORS Proxyサービスを利用
+- フォールバック構成で信頼性を向上
 
-**メリット**:
-- ローカライズが容易
-- 一貫性の確保
-- テストしやすい
+**懸念事項と対応**:
+1. **corsproxy.io の利用規約**:
+   - 「production site」で有料プランが必要と記載
+   - 個人の非商用プロジェクトが該当するかは不明確
+   - **対応**: README.mdに現状を明記、非商用として運用中
 
-### 4. UI要素のキャッシュ
-**実装箇所**: `app.js:30-37`
+2. **プライバシーリスク**:
+   - ユーザーのIPアドレスがCORS Proxyサーバーに送信される
+   - **対応**: プライバシーポリシーで明示的に開示
 
-**メリット**:
-- DOM参照の一元管理
-- パフォーマンス向上
-- コードの可読性向上
+3. **サービス停止リスク**:
+   - 第三者サービスのため、予告なく停止する可能性
+   - **対応**: フォールバック構成、免責事項で明記
 
----
+**残したまま**:
+- corsproxy.io をフォールバックとして維持
+- allorigins.win停止時のバックアップとして機能
 
-## 📝 コードのキーポイント
+### 4. プライバシーポリシーの追加
 
-### app.js の主要関数
+**決定**: 第三者への情報送信を明示的に開示
 
-#### UI管理
-```javascript
-const UI = { ... }              // DOM要素キャッシュ
-setLoadingState(isLoading)      // ローディング状態管理
-clearOutputs()                  // 出力エリアクリア
-parseLimit(value)               // 取得件数パース
-```
+**理由**:
+- CORS Proxy 経由でIPアドレスが第三者に送信される
+- ユーザーが意識していない情報が収集される
+- 個人情報保護法の観点でリスク回避
+- SNS公開前にトラブル防止
 
-#### 入力処理
-```javascript
-normalizeInput(input)           // チャンネルID抽出
-parseChannelInput(rawInput)     // 入力パース（valid/invalid分離）
-```
+**記載内容**:
+- **送信される情報**: チャンネルID、IPアドレス、アクセス時刻、ブラウザ情報
+- **送信先**: allorigins.win, corsproxy.io, YouTube RSS
+- **本アプリのデータ管理**: データを保存しない、ログを記録しない、Cookieを使用しない
+- **利用者の同意**: ボタンクリック = 同意とみなす
 
-#### データ取得
-```javascript
-fetchWithTimeout(url, timeout)  // タイムアウト付きfetch
-fetchWithProxy(targetUrl)       // CORSプロキシ経由fetch
-fetchChannelVideos(channelId)   // チャンネル動画取得
-```
+**実装箇所**:
+- README.md: 詳細なプライバシーポリシー
+- index.html: 黄色の警告ボックス（目立つ表示）
 
-#### パース
-```javascript
-getNodeText(parent, selector)   // XMLノードテキスト取得
-entryToVideo(entry)             // XMLエントリー→動画オブジェクト変換
-```
+### 5. GitHubリポジトリをPublicのまま維持
 
-#### 並列処理
-```javascript
-runWithLimit(items, limit, task) // Promise pool（順序保証）
-runChannelFetches(validInputs)   // 複数チャンネル並列取得
-```
+**決定**: リポジトリは Public
 
-#### UI更新
-```javascript
-renderResults(resultsData)      // 結果表示
-createOutputBlock(title, content) // 出力ブロック作成
-createErrorItem({ message })    // エラー要素作成
-renderErrors(errorsData)        // エラー表示（集約機能付き）
-showGlobalError(error)          // グローバルエラー表示
-```
+**理由**:
+- APIキーや秘密情報を使用していない（現時点）
+- すべてクライアントサイドで動作
+- オープンソースとして公開可能
+- Private化しても security benefit がない
 
----
+**重要な注意点**:
+> Privateリポジトリでも安全ではない
+> - Git履歴に永久保存される
+> - アカウント侵害で流出リスク
+> - 誤って公開される可能性
+> - CI/CDツールやログに露出
 
-## ⚠️ 既知の制限事項と懸念点
-
-### 1. CORS Proxy への依存 🔴
-**問題**: 外部サービスが停止すると全機能停止
-**影響度**: High
-**対策**: Cloudflare Workers で独自プロキシ実装を推奨
-
-### 2. YouTube RSS の制限
-**問題**: 最新15件程度しか取得できない
-**影響度**: Medium
-**対策**: YouTube Data API 移行（APIキー必要）
-
-### 3. @username 非対応
-**問題**: `@handle` 形式のチャンネル指定ができない
-**影響度**: Low
-**対策**: YouTube Data API で解決可能
-
-### 4. プライバシー懸念
-**問題**: チャンネルIDがCORS Proxyに送信される
-**影響度**: Low（個人利用なら問題なし）
-**対策**: 独自プロキシ実装
-
-### 5. ブラウザ互換性
-**対象**: モダンブラウザのみ（IE非対応）
-**必要機能**: Fetch API, DOMParser, Clipboard API, Optional Chaining
-**影響度**: Low（現代的なブラウザは全て対応）
+**将来的な注意点**:
+- YouTube Data API を使用する場合でも、環境変数で管理すれば Public のまま可能
+- `.env` を `.gitignore` に追加することが必須
+- APIキーは絶対にコードに書かない
 
 ---
 
-## 🚀 デプロイ情報
+## 技術構成
 
-### Cloudflare Pages 設定
+### フロントエンド
+- **Pure HTML/CSS/JavaScript**
+- フレームワーク不使用
+- ビルドツール不要
+- モダンブラウザ対応（Chrome, Firefox, Edge, Safari）
+
+### 主要APIとライブラリ
+- **DOMParser API**: XML パース
+- **Fetch API**: HTTP リクエスト
+- **AbortController**: タイムアウト制御
+- ライブラリ依存なし
+
+### 外部サービス依存
+
+#### 1. allorigins.win (CORS Proxy - プライマリ)
+- **ライセンス**: MIT
+- **利用規約**: 不明
+- **レート制限**: 不明
+- **GitHub**: https://github.com/gnuns/allorigins
+- **用途**: YouTube RSS へのCORS制限回避
+
+#### 2. corsproxy.io (CORS Proxy - フォールバック)
+- **利用規約**: 開発用途は無料、「production site」は有料（曖昧）
+- **公式サイト**: https://corsproxy.io/
+- **用途**: allorigins.win 停止時のフォールバック
+
+#### 3. YouTube RSS
+- **URL**: https://www.youtube.com/feeds/videos.xml?channel_id=...
+- **認証**: 不要
+- **制限**: 最新15件まで
+
+### パフォーマンス最適化
+- **同時実行制限**: 3チャンネルまで（`CONCURRENCY_LIMIT`）
+- **タイムアウト**: 10秒（各CORS Proxy）
+- **Promise Pool**: 順序保証しながら並列実行
+- **DOM操作最適化**: 配列を1回だけ走査（reduce使用）
+
+### セキュリティ対策
+- **XSS対策**: `textContent` のみ使用（`innerHTML` 禁止）
+- **入力検証**: 正規表現でチャンネルID形式をチェック
+- **チャンネルID検証**: RSSのyt:channelIdと入力を照合
+- **URL検証**: 生成されたURLがYouTubeドメインか確認
+- **タイムアウト**: 長時間リクエストの防止
+
+---
+
+## デプロイ環境
+
+### Cloudflare Pages
+- **デプロイ方法**: Git連携（main ブランチへのpushで自動デプロイ）
+- **ビルドコマンド**: なし
+- **出力ディレクトリ**: `/`（ルート）
+- **プレビュー**: feature/* ブランチで自動的にプレビューURLが生成される
+
+### デプロイフロー
 ```
-Project name:           youtube-list-tool
-Production branch:      main
-Framework preset:       None
-Build command:          （空欄）
-Build output directory: /
-Environment variables:  （設定不要）
+1. ローカルで開発・テスト
+2. git add/commit（手動、CLAUDE.mdのルールに従う）
+3. git push origin main
+4. Cloudflare Pages が自動検知
+5. 本番環境に自動デプロイ（数分以内）
 ```
-
-### 自動デプロイ
-- `main` ブランチへのpushで自動デプロイ
-- デプロイ時間: 約30秒〜1分
-- ビルドログ: Cloudflare Pagesダッシュボードで確認可能
-
-### カスタムドメイン
-- 設定方法: Cloudflare Pages → Custom domains
-- SSL証明書: 自動発行
-
----
-
-## 🔐 セキュリティ
-
-### 実装済み
-- [x] XSS対策（textContentのみ使用、innerHTMLは禁止）
-- [x] RSS改ざん検証（チャンネルID検証、URL検証）
-- [x] タイムアウト制御（10秒）
-- [x] エラーハンドリング（全API呼び出し）
-
-### 注意点
-- APIキーなし（環境変数不要）
-- ブラウザ側で完結（サーバーサイド処理なし）
-- シークレット情報なし
-
----
-
-## 📚 重要ドキュメント
-
-### 必読
-1. **CLAUDE.md** - 開発ルール（絶対に守ること）
-   - 自動commit/push禁止
-   - 変更前に差分提示
-   - シークレットのハードコーディング禁止
-
-2. **README.md** - ユーザー向け使い方
-   - ローカルサーバー起動方法
-   - チャンネルID確認方法
-   - CORS対策の説明
-
----
-
-## 🛠️ 開発環境
-
-### 推奨環境
-- WSL2 (Ubuntu)
-- Claude Code
-- Git
-- Python 3（ローカルサーバー用: `python -m http.server 8000`）
-
-### ローカル開発手順
-```bash
-# リポジトリクローン
-git clone https://github.com/rm007080/YouTubeListTool.git
-cd YouTubeListTool
-
-# ローカルサーバー起動
-python -m http.server 8000
-
-# ブラウザでアクセス
-# http://localhost:8000
-```
-
-### テスト手順
-1. ローカルサーバー起動
-2. 有効なチャンネルIDを入力（例: `UCqm-hTLLmPbB2e7z6sG3Zrg`）
-3. 「取得」ボタンクリック
-4. URLs/Titles/Datesが表示されることを確認
-5. コピーボタンの動作確認
-6. エラーケースのテスト（不正な入力、@username など）
-
----
-
-## 📈 今後の改善提案
-
-### 優先度: High
-1. **独自CORSプロキシの実装**（Cloudflare Workers）
-   - 外部依存の解消
-   - プライバシー保護
-   - 安定性向上
-
-2. **エラーログの収集**（Cloudflare Analytics）
-   - ユーザーがどこで躓いているか把握
-   - CORS Proxy失敗率のモニタリング
-
-### 優先度: Medium
-3. **YouTube Data API 統合**（オプション機能）
-   - @username 対応
-   - 詳細情報取得（再生回数、いいね数など）
-   - プレイリスト対応
-
-4. **PWA化**
-   - オフライン対応
-   - インストール可能に
-
-5. **UI改善**
-   - ダークモード
-   - 多言語対応
-   - 結果のエクスポート（CSV、JSON）
-
-### 優先度: Low
-6. **TypeScript移行**
-   - 型安全性
-   - エディタサポート改善
-
-7. **テストコード追加**
-   - ユニットテスト（Jest）
-   - E2Eテスト（Playwright）
-
----
-
-## 🔄 Git ワークフロー
 
 ### ブランチ戦略
-- `main` - 本番ブランチ（Cloudflare Pagesと連携）
-- `レビューなし実装` - 開発ブランチ（必要に応じて使用）
-- 機能追加時は feature/* ブランチを推奨
+- **main**: 本番環境（Cloudflare Pagesと連携）
+- **feature/***: 開発用ブランチ（Cloudflare Preview Deploysで確認可能）
 
-### コミットメッセージ規約
+### 環境変数
+**現在**: 使用していない
+
+**将来（YouTube Data API 使用時）**:
+- `YOUTUBE_API_KEY`: YouTube Data API キー（Cloudflare Workers環境変数で管理）
+- `APP_SECRET`: 認証用シークレット
+- `FIREBASE_PROJECT_ID`: Firebase認証用（オプション）
+
+---
+
+## 重要な制約事項
+
+### YouTube RSS の制約
+1. **最新15件まで**: YouTube RSS フィードは最新15件までしか提供しない
+2. **ページネーション不可**: 16件目以降の動画は取得できない
+3. **更新遅延**: RSS の更新には数分〜数時間の遅延がある
+4. **非対応形式**:
+   - `@username` (ハンドル形式) → YouTube Data API が必要
+   - `/c/channelname` (カスタムURL) → 廃止された形式
+
+### CORS Proxy の制約
+1. **第三者サービス依存**: 自前のインフラではない
+2. **レート制限**: allorigins.win の制限は不明、corsproxy.io は要確認
+3. **サービス停止リスク**: プロバイダーの都合で停止する可能性
+4. **プライバシー**: ユーザーのIPアドレスがProxyサーバーに記録される可能性
+
+### アプリケーションの制約
+1. **並列取得制限**: 同時3チャンネルまで（レート制限回避のため）
+2. **タイムアウト**: 各リクエスト10秒
+3. **ブラウザ依存**: モダンブラウザ必須（IE非対応）
+
+---
+
+## セキュリティ・コンプライアンス
+
+### 実装済みのセキュリティ対策
+
+| 対策 | 実装内容 | コード箇所 |
+|------|---------|-----------|
+| XSS対策 | `textContent`のみ使用 | app.js:315, 336 |
+| 入力検証 | 正規表現でチャンネルID検証 | app.js:8-9, 125 |
+| チャンネルID検証 | RSS応答のyt:channelIdと照合 | app.js:236-238 |
+| URL検証 | 生成URLがYouTubeドメインか確認 | app.js:249-251 |
+| タイムアウト | AbortControllerで10秒制限 | app.js:74-88 |
+| エラーハンドリング | 全エラーをキャッチして表示 | app.js:256-258, 498-500 |
+
+### コンプライアンス対応
+
+#### Googleブランディングガイドライン
+- ✅ アプリ名に「YouTube」を含まない
+- ✅ 説明文で間接的に言及（「YouTube チャンネルに対応した」）
+- ✅ 技術的な説明は維持（「YouTube RSS」など）
+
+#### プライバシー保護
+- ✅ 第三者への情報送信を明記（README.md, index.html）
+- ✅ IPアドレス送信を明示
+- ✅ 利用者の同意を取得（ボタンクリック = 同意）
+- ✅ 本アプリ自体はデータを保存しないことを明記
+
+#### 利用規約
+- ✅ 個人利用・教育目的限定
+- ✅ 商用利用禁止
+- ✅ YouTube利用規約への準拠を要求
+- ✅ 免責事項（無保証、サービス停止リスク、損害責任の免責）
+
+### 未対応（将来的に必要になる可能性）
+- ❌ GDPR対応（EU圏ユーザー向け）
+- ❌ Cookie同意バナー（現状Cookieを使用していないため不要）
+- ❌ データ削除リクエストの仕組み（現状データを保存していないため不要）
+
+---
+
+## 今後の課題と将来計画
+
+### 短期的な改善（優先度: 中）
+
+1. **エラーメッセージの改善**
+   - 現状: 技術的なエラーメッセージ
+   - 改善: ユーザーフレンドリーな説明
+
+2. **ローディングUI の改善**
+   - 現状: シンプルなスピナー
+   - 改善: 進捗状況の表示（「3/5 チャンネル取得中」など）
+
+3. **結果のエクスポート機能**
+   - CSVダウンロード
+   - JSONダウンロード
+
+### 中期的な機能追加（優先度: 低〜中）
+
+1. **@username 形式への対応**
+   - **要件**: YouTube Data API の導入が必須
+   - **影響**: バックエンド（Cloudflare Workers等）の構築が必要
+   - **詳細**: 下記「YouTube Data API 導入計画」を参照
+
+2. **日付範囲フィルター**
+   - 「2024年1月以降の動画のみ」などの絞り込み
+
+3. **ダークモード**
+   - CSS変数を使用したテーマ切り替え
+
+### 長期的な検討（優先度: 低）
+
+1. **自前CORS Proxyの構築**
+   - Cloudflare Workers で実装
+   - 第三者サービスへの依存を排除
+   - プライバシーリスクの低減
+
+2. **PWA化**
+   - オフライン対応
+   - Service Worker の導入
+
+---
+
+## YouTube Data API 導入計画（将来）
+
+**注意**: この計画は将来的な実装のためのメモです。現時点では実装していません。
+
+### 必要になるケース
+- @username 形式のチャンネル入力に対応したい場合
+- 16件以上の動画を取得したい場合
+- 動画の詳細情報（再生回数、いいね数など）を取得したい場合
+
+### 実装要件
+
+#### 1. ポリシー順守（必須）
+
+YouTube Data APIを使用する場合、以下のポリシー準拠が**必須**です：
+
+**必須リンクの追加**:
+```html
+<footer class="legal-links">
+  <a href="privacy-policy.html">プライバシーポリシー</a> |
+  <a href="terms.html">利用規約</a> |
+  <a href="https://www.youtube.com/t/terms" target="_blank">YouTube 利用規約</a> |
+  <a href="https://policies.google.com/privacy" target="_blank">Google プライバシーポリシー</a>
+</footer>
 ```
-<type>: <subject>
 
-<body>
+**プライバシーポリシーに必須の記載**:
+- YouTube API サービスの使用を通知
+- Googleプライバシーポリシーへのリンク
+- データアクセス取り消し方法: https://security.google.com/settings/security/permissions
+- データ削除リクエストの方法（30日以内に削除）
+- ユーザーデータの収集・使用・保存方法
+- 第三者への共有方法
 
-例:
-feat: 独自CORSプロキシ実装
+**初回使用時の同意モーダル（必須）**:
+- ユーザーがアプリの機能にアクセスする前に同意を求める
+- YouTube利用規約とGoogleプライバシーポリシーへのリンク
+- データアクセスの取り消し方法を説明
 
-- Cloudflare Workersでプロキシ作成
-- allorigins.winへの依存を解消
-- プライバシー保護を改善
-```
+**参考リンク**:
+- https://developers.google.com/youtube/terms/developer-policies?hl=ja
+- https://developers.google.com/youtube/terms/developer-policies-guide?hl=ja
 
-**Type**:
-- `feat`: 新機能
-- `fix`: バグ修正
-- `refactor`: リファクタリング
-- `docs`: ドキュメント更新
-- `style`: コードスタイル修正
-- `test`: テスト追加
+#### 2. バックエンドの構築（必須）
 
----
+**理由**:
+> クラウド上の Git リポジトリに API キーが含まれることは大きなセキュリティリスク
+> リポジトリがプライベートであるかどうかと、API キーを利用することと、イコールにはなりません
 
-## 📞 連絡先・リソース
+**リスク**:
+- Git履歴に永久保存される
+- アカウント侵害で流出
+- 誤って公開される可能性
+- CI/CDツールやログに露出
 
-### 参考リンク
-- [Cloudflare Pages Docs](https://developers.cloudflare.com/pages/)
-- [YouTube RSS Feed](https://support.google.com/youtube/answer/6224202)
-- [WCAG Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
-
-### トラブルシューティング
-**問題**: CORSエラーが発生
-**解決**: プロキシが停止している可能性。Cloudflare Workersで独自プロキシ実装を推奨
-
-**問題**: RSSが15件しか取得できない
-**解決**: YouTube仕様。全件取得にはYouTube Data API必要
-
-**問題**: デプロイ後に404エラー
-**解決**: `index.html` がルートにあるか確認。Build output directoryが `/` になっているか確認
-
----
-
-## ✅ 次回セッション開始時のチェックリスト
-
-- [ ] README.md とCLAUDE.md を再確認
-- [ ] `git status` で変更確認
-- [ ] `git pull origin main` で最新取得
-- [ ] ローカルサーバー起動して動作確認
-- [ ] Cloudflare Pagesの本番サイト確認
-- [ ] 既知の問題が解決されているか確認
-
----
-
-## 🎯 Claude Code 用クイックスタートプロンプト
-
-次回セッション開始時に、以下をClaude Codeに貼り付けてください：
+**推奨構成**: Cloudflare Workers
 
 ```
-YouTubeListToolプロジェクトの作業を再開します。
-
-【プロジェクト概要】
-- YouTube チャンネルから動画情報を取得するツール
-- Pure HTML/CSS/JavaScript（フレームワーク不使用）
-- Cloudflare Pages でデプロイ済み
-
-【重要ルール（CLAUDE.md）】
-1. 絶対に自動でgit commit/pushしないこと
-2. 変更前に差分を提示すること
-3. シークレット情報をハードコーディングしないこと
-
-【現在の状態】
-- 本番デプロイ済み（動作確認済み）
-- Codex MCPによる大規模リファクタリング完了
-- 全機能実装済み
-
-【主要ファイル】
-- index.html: UI
-- app.js: ロジック（512行）
-- style.css: スタイル
-- HANDOVER.md: 引き継ぎドキュメント（このファイル）
-
-【既知の課題】
-- CORS Proxyへの外部依存（allorigins.win, corsproxy.io）
-  → Cloudflare Workers実装を推奨
-
-作業内容を教えてください。
+[フロントエンド (Cloudflare Pages)]
+    ↓ HTTPS リクエスト
+[バックエンド (Cloudflare Workers)] ← 環境変数でAPIキー管理
+    ↓ YouTube Data API
+[YouTube]
 ```
 
+**実装例**:
+```javascript
+// workers/youtube-api.js
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    const handle = url.searchParams.get('handle'); // @username
+
+    // 環境変数からAPIキー取得
+    const API_KEY = env.YOUTUBE_API_KEY;
+
+    // YouTube Data API 呼び出し
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${handle}&type=channel&key=${API_KEY}`
+    );
+
+    const data = await response.json();
+    const channelId = data.items[0]?.id?.channelId;
+
+    return new Response(JSON.stringify({ channelId }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': 'https://your-app.pages.dev'
+      }
+    });
+  }
+};
+```
+
+**環境変数設定**:
+```bash
+# Cloudflare Workers Secrets（Git にコミットしない）
+wrangler secret put YOUTUBE_API_KEY
+```
+
+**`.gitignore` に追加**:
+```gitignore
+# 環境変数（APIキーを含む）
+.env
+.env.local
+.env.production
+.dev.vars
+```
+
+#### 3. 認証・認可の実装（推奨）
+
+**理由**:
+> サービス提供者側が用意する第三者サービスの API キーを使用するのであれば、アプリの認証や認可が必要か？、というのは検討した方が良い
+
+**問題**: 認証なしだと、誰でもあなたのAPIを無制限に使える
+- 悪意のあるユーザーがクォータを使い果たす
+- 課金が発生する可能性
+
+**推奨方法**:
+- Firebase Authentication + トークン検証
+- レート制限（Cloudflare KV 使用）
+
+**実装例**:
+```javascript
+export default {
+  async fetch(request, env) {
+    // 1. 認証トークン検証
+    const authHeader = request.headers.get('Authorization');
+    const token = authHeader?.substring(7);
+
+    if (!await verifyToken(token)) {
+      return new Response('Unauthorized', { status: 401 });
+    }
+
+    // 2. レート制限チェック
+    const userId = extractUserId(token);
+    const limitKey = `limit:${userId}`;
+    const count = await env.KV.get(limitKey);
+
+    if (count && parseInt(count) > 100) {
+      return new Response('Rate limit exceeded', { status: 429 });
+    }
+
+    // 3. YouTube API 呼び出し
+    // ...
+  }
+};
+```
+
+#### 4. ユーザーのAPIキーを保存する場合の注意（別案）
+
+> 第三者サービスの API キーをアプリ利用者が用意する場合は、その情報を localstorage や Indexddb など利用者のセキュリティリスクになり得る場所には保存しない
+
+**問題**: localStorageやIndexedDBに平文で保存すると、XSS攻撃で盗まれる
+
+**推奨方法**:
+1. **セッションのみで保持**（最も安全）
+   ```javascript
+   let apiKey = null; // メモリ内に保存
+   // ページを閉じれば消える
+   ```
+
+2. **sessionStorage を使う**（中間案）
+   ```javascript
+   sessionStorage.setItem('key', apiKey);
+   // タブを閉じれば消える
+   ```
+
+3. **Web Crypto API で暗号化**（高度）
+   ```javascript
+   // ユーザーのパスワードで暗号化してlocalStorageに保存
+   await crypto.subtle.encrypt(...)
+   ```
+
+**結論**: ユーザーのAPIキー方式は避け、開発者が管理したAPIキーをバックエンドで使う方が安全
+
 ---
 
-## 📊 プロジェクト統計
+## トラブルシューティング
 
-- **開発期間**: 2025-10-25 〜 2025-10-26
-- **総コミット数**: 確認してください（`git log --oneline | wc -l`）
-- **総ファイル数**: 11ファイル
-- **総コード行数**: 約600行（HTML/CSS/JS合計）
-- **依存パッケージ**: 0（Pure JavaScript）
-- **外部API**: YouTube RSS Feed（無料、APIキー不要）
+### よくある問題と解決方法
+
+#### 1. 全てのCORS Proxyが利用できません
+
+**原因**:
+- CORS Proxyサービスがダウンしている
+- レート制限に達している
+
+**解決方法**:
+1. 時間をおいて再試行（15分〜1時間後）
+2. 入力チャンネル数を減らす
+
+**長期的対策**:
+- 自前のCORS Proxyを構築（Cloudflare Workers）
+
+#### 2. @username 形式は非対応です
+
+**原因**:
+- ハンドル形式はYouTube Data APIが必要
+
+**解決方法**:
+1. YouTubeでチャンネルページを開く
+2. ページのソースを表示（Ctrl+U）
+3. `"channelId":"UC..."` を検索
+4. 見つかったチャンネルID（UC...）を使用
+
+#### 3. 取得失敗: Invalid XML format
+
+**原因**:
+- チャンネルが存在しない
+- チャンネルIDが間違っている
+
+**解決方法**:
+1. チャンネルIDが正しいか確認（UC + 22文字）
+2. ブラウザで直接RSS URLにアクセス:
+   `https://www.youtube.com/feeds/videos.xml?channel_id=UC...`
 
 ---
 
-**最終チェック日**: 2025-10-26
-**チェック者**: Claude Code
-**状態**: ✅ デプロイ完了、本番稼働中
+## 参考リンク
+
+### 公式ドキュメント
+- [YouTube RSS Feeds](https://support.google.com/youtube/answer/6224202)
+- [YouTube ブランディングガイドライン](https://developers.google.com/youtube/terms/branding-guidelines?hl=ja)
+- [YouTube デベロッパーポリシー](https://developers.google.com/youtube/terms/developer-policies?hl=ja)
+- [YouTube Data API](https://developers.google.com/youtube/v3)
+- [Googleプライバシーポリシー](https://policies.google.com/privacy)
+- [Cloudflare Workers](https://developers.cloudflare.com/workers/)
+- [Cloudflare Pages](https://developers.cloudflare.com/pages/)
+
+### 使用サービス
+- [allorigins.win](https://allorigins.win/) - CORS Proxy
+- [allorigins.win GitHub](https://github.com/gnuns/allorigins)
+- [corsproxy.io](https://corsproxy.io/) - CORS Proxy
+
+### セキュリティ
+- [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API)
+- [OWASP XSS Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)
+
+---
+
+## 開発ルール（重要）
+
+このプロジェクトは `CLAUDE.md` に記載された開発ルールに従っています。
+新しい開発者またはAIアシスタントは、コード変更前に必ず `CLAUDE.md` を確認してください。
+
+**特に重要なルール**:
+
+1. **絶対に自動で `git commit` や `git push` を実行しないこと**
+   - 変更は必ず差分を提示してユーザーの承認を得る
+   - ユーザーがローカルで手動実行
+
+2. **変更の目的と影響を事前に説明すること**
+   - 何を変更するか
+   - なぜ変更するか
+   - どのファイルに影響するか
+
+3. **シークレット情報をコードに書かないこと**
+   - `.env.example` を提示
+   - 実値はユーザーに設定させる
+
+4. **テスト手順を必ず提示すること**
+   - ブラウザでの確認方法
+   - 期待される動作
+
+---
+
+## 連絡先・サポート
+
+**プロジェクトオーナー**: （あなたの情報を記載）
+**GitHub Issues**: （リポジトリURL/issues）
+**Email**: （メールアドレス）
+
+---
+
+**最終更新**: 2025-10-28
+**バージョン**: 1.0.0
+**ステータス**: 本番環境稼働中
