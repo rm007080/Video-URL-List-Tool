@@ -30,7 +30,7 @@ YouTube チャンネルの動画情報（URL、タイトル、公開日）を取
 
 ## 本番環境
 - Production: `https://youtube-list-tool.pages.dev`
-- GitHub: `rm007080/YouTubeListTool`
+- GitHub: `rm007080/Video-URL-List-Tool`
 - メインブランチ: `main`
 
 ## 実装済み機能

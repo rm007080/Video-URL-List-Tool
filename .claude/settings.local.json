@@ -3,7 +3,11 @@
     "allow": [
       "mcp__codex__codex",
       "mcp__serena__write_memory",
-      "WebFetch(domain:corsproxy.io)"
+      "WebFetch(domain:corsproxy.io)",
+      "mcp__serena__list_memories",
+      "mcp__serena__activate_project",
+      "mcp__serena__check_onboarding_performed",
+      "Read(//mnt/c/Users/littl/OneDrive/Pictures/Screenshots/**)"
     ],
     "deny": [],
     "ask": []
