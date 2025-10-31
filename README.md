@@ -248,3 +248,4 @@ const CONCURRENCY_LIMIT = 5; // 同時5件に変更
   <option value="15" selected>最新15件（最大）</option>
 </select>
 ```
+# Test Claude Integration
