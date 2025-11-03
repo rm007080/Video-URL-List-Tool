@@ -1,4 +1,10 @@
-    // A simple function to add two numbers
-    function add(a, b) {
-        return a + b;
-      }
+function calculatePrice(basePrice, taxRate, discount) {
+    var priceWithTax = basePrice * (1 + taxRate);
+    var finalPrice = priceWithTax - discount;
+    
+    if (finalPrice < 0) {
+        console.log("Warning: Final price is negative.");
+    }
+
+    return finalPrice;
+}
