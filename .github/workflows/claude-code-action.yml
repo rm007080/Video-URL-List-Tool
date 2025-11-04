@@ -15,6 +15,7 @@ permissions:
 jobs:
   claude-code-action:
     runs-on: ubuntu-latest
+    secrets: inherit
     if: |
       (github.event_name == 'pull_request') ||
       (github.event_name == 'issue_comment' && 
