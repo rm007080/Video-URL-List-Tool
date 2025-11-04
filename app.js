@@ -10,19 +10,22 @@ const CHANNEL_URL_REGEX = /youtube\.com\/channel\/(UC[\w-]{22})/;
 const CONCURRENCY_LIMIT = 3; // 同時実行数の制限
 const DEFAULT_LIMIT = 15;
 
+// エクスポート用のデータ保持
+let lastFetchedData = null;
+
 // エラーメッセージの定数化
 const ERROR_MESSAGES = {
   EMPTY_LINE: '空行',
-  INVALID_AT: '@username 形式は非対応です。チャンネルID（UC...）を使用してください。',
+  INVALID_AT: '@username 形式は非対応です。チャンネルID（UC...）を使用してください。YouTubeのチャンネルページを開き、URLから「UC...」の部分をコピーしてください。',
   INVALID_C: '/c/ 形式は廃止されました。チャンネルID（UC...）を使用してください。',
   INVALID_FORMAT: '不正な形式です。チャンネルID（UC...）または /channel/UC... を入力してください。',
   INPUT_REQUIRED: 'チャンネルIDまたはURLを入力してください。',
   ALL_FAILED: '全てのチャンネルで取得に失敗しました。入力内容を確認してください。',
-  TIMEOUT: 'タイムアウトしました',
-  PROXY_UNAVAILABLE: '全てのCORS Proxyが利用できません。時間をおいて再試行してください。',
-  INVALID_XML: 'Invalid XML format',
-  CHANNEL_MISMATCH: '要求したチャンネルとRSSの発信元が一致しません',
-  INVALID_URL: '不正な動画URLを検出しました',
+  TIMEOUT: '接続がタイムアウトしました。インターネット接続を確認するか、時間をおいて再試行してください。',
+  PROXY_UNAVAILABLE: 'CORS Proxyサービスが一時的に利用できません。レート制限に達している可能性があります。15分ほど待ってから再試行してください。',
+  INVALID_XML: 'チャンネルが存在しないか、RSSフィードの取得に失敗しました。チャンネルIDが正しいか確認してください。',
+  CHANNEL_MISMATCH: 'セキュリティエラー: 要求したチャンネルとRSSの発信元が一致しません',
+  INVALID_URL: 'セキュリティエラー: 不正な動画URLを検出しました',
   CHANNEL_NAME_UNKNOWN: 'チャンネル名不明',
   TITLE_UNKNOWN: 'タイトル不明'
 };
@@ -31,10 +34,12 @@ const ERROR_MESSAGES = {
 const UI = {
   get fetchButton() { return document.getElementById('fetchButton'); },
   get loading() { return document.getElementById('loading'); },
+  get loadingText() { return document.getElementById('loadingText'); },
   get results() { return document.getElementById('results'); },
   get errors() { return document.getElementById('errors'); },
   get channelInput() { return document.getElementById('channelInput'); },
-  get limitSelect() { return document.getElementById('limitSelect'); }
+  get limitSelect() { return document.getElementById('limitSelect'); },
+  get exportButtons() { return document.getElementById('exportButtons'); }
 };
 
 // ===== UI状態管理ヘルパー =====
@@ -42,10 +47,14 @@ const UI = {
 /**
  * ローディング状態を設定
  * @param {boolean} isLoading - ローディング中かどうか
+ * @param {string} progressText - プログレステキスト（オプション）
  */
-function setLoadingState(isLoading) {
+function setLoadingState(isLoading, progressText = '取得中...') {
   UI.fetchButton.disabled = isLoading;
   UI.loading.toggleAttribute('hidden', !isLoading);
+  if (isLoading && UI.loadingText) {
+    UI.loadingText.textContent = progressText;
+  }
 }
 
 /**
@@ -54,6 +63,9 @@ function setLoadingState(isLoading) {
 function clearOutputs() {
   UI.results.textContent = '';
   UI.errors.textContent = '';
+  if (UI.exportButtons) {
+    UI.exportButtons.style.display = 'none';
+  }
 }
 
 /**
@@ -378,6 +390,95 @@ function showGlobalError(error) {
   UI.errors.appendChild(createErrorItem({ message: error.message }));
 }
 
+// ===== エクスポート機能 =====
+
+/**
+ * ファイルをダウンロード
+ * @param {string} content - ファイル内容
+ * @param {string} fileName - ファイル名
+ * @param {string} mimeType - MIMEタイプ
+ */
+function downloadFile(content, fileName, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * CSV形式でエクスポート
+ */
+function exportAsCSV() {
+  if (!lastFetchedData || lastFetchedData.length === 0) {
+    alert('エクスポートするデータがありません。');
+    return;
+  }
+
+  // CSVヘッダー
+  const headers = ['Channel', 'Title', 'URL', 'Published Date'];
+
+  // CSVデータ行を生成
+  const rows = lastFetchedData.flatMap(({ channelTitle, videos }) =>
+    videos.map(video => [
+      channelTitle,
+      video.title,
+      video.url,
+      video.published
+    ])
+  );
+
+  // CSV文字列を生成（XSS対策: ダブルクォートをエスケープ）
+  const csvContent = [
+    headers,
+    ...rows
+  ].map(row =>
+    row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+  ).join('\n');
+
+  // ダウンロード実行
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  downloadFile(csvContent, `youtube-videos-${timestamp}.csv`, 'text/csv;charset=utf-8;');
+}
+
+/**
+ * JSON形式でエクスポート
+ */
+function exportAsJSON() {
+  if (!lastFetchedData || lastFetchedData.length === 0) {
+    alert('エクスポートするデータがありません。');
+    return;
+  }
+
+  // JSON データ構造
+  const jsonData = {
+    exportedAt: new Date().toISOString(),
+    totalChannels: lastFetchedData.length,
+    totalVideos: lastFetchedData.reduce((sum, { videos }) => sum + videos.length, 0),
+    channels: lastFetchedData.map(({ channelTitle, videos }) => ({
+      channelTitle,
+      videoCount: videos.length,
+      videos: videos.map(video => ({
+        title: video.title,
+        url: video.url,
+        publishedDate: video.published
+      }))
+    }))
+  };
+
+  // ダウンロード実行
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  downloadFile(
+    JSON.stringify(jsonData, null, 2),
+    `youtube-videos-${timestamp}.json`,
+    'application/json;charset=utf-8;'
+  );
+}
+
 // ===== メインロジック =====
 
 /**
@@ -436,10 +537,18 @@ function parseChannelInput(rawInput) {
  * @returns {Promise<{ results: Array, errors: Array }>}
  */
 async function runChannelFetches(validInputs, limit) {
+  let completedCount = 0;
+  const totalCount = validInputs.length;
+
   const fetchResults = await runWithLimit(validInputs, CONCURRENCY_LIMIT, async (input) => {
     try {
-      return { success: true, data: await fetchChannelVideos(input.channelId, limit) };
+      const result = { success: true, data: await fetchChannelVideos(input.channelId, limit) };
+      completedCount++;
+      setLoadingState(true, `取得中... (${completedCount}/${totalCount} チャンネル処理済み)`);
+      return result;
     } catch (error) {
+      completedCount++;
+      setLoadingState(true, `取得中... (${completedCount}/${totalCount} チャンネル処理済み)`);
       return { success: false, error: error.message, input: input.original };
     }
   });
@@ -464,7 +573,7 @@ async function handleFetch() {
 
   // 状態リセットとローディング表示
   clearOutputs();
-  setLoadingState(true);
+  setLoadingState(true, '取得中...');
 
   try {
     // 入力をパース
@@ -482,6 +591,12 @@ async function handleFetch() {
     // 結果表示
     if (results.length > 0) {
       renderResults(results);
+      // エクスポート用にデータを保存
+      lastFetchedData = results;
+      // エクスポートボタンを表示
+      if (UI.exportButtons) {
+        UI.exportButtons.style.display = 'block';
+      }
     }
 
     // エラー表示
