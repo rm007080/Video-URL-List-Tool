@@ -13,7 +13,7 @@ const ALLOWED_ORIGINS = [
   'http://localhost:8000',
   'http://localhost:3000',
   'http://127.0.0.1:8000',
-  'https://your-app.pages.dev', // Cloudflare Pages URL（デプロイ後に変更）
+  'https://youtubelisttool.pages.dev', // Cloudflare Pages 本番URL
 ];
 
 // YouTube RSS URLのパターン
