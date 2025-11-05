@@ -58,6 +58,78 @@ npx http-server -p 8000
 http://localhost:8000/index.html
 ```
 
+## Cloudflare Workers デプロイ手順（オプション）
+
+自前のCORS Proxyを構築することで、第三者サービスへの依存を減らし、プライバシーリスクを低減できます。
+
+### 前提条件
+
+- Cloudflare アカウント（無料プランでOK）
+- Node.js と npm がインストール済み
+
+### 1. Wrangler CLI をインストール
+
+```bash
+npm install -g wrangler
+```
+
+### 2. Cloudflare にログイン
+
+```bash
+wrangler login
+```
+
+ブラウザが開くので、Cloudflareアカウントで認証します。
+
+### 3. Worker をデプロイ
+
+```bash
+# プロジェクトディレクトリで実行
+wrangler deploy
+```
+
+### 4. Worker URL を確認
+
+デプロイ後、以下のような URL が表示されます：
+```
+https://youtube-list-tool-proxy.YOUR_SUBDOMAIN.workers.dev
+```
+
+### 5. app.js を更新
+
+1. `app.js` を開く
+2. `PROXY_CONFIG` の `Custom Worker` の URL を更新：
+   ```javascript
+   url: 'https://youtube-list-tool-proxy.YOUR_SUBDOMAIN.workers.dev/?url=',
+   ```
+3. `enabled` を `true` に変更：
+   ```javascript
+   enabled: true
+   ```
+
+### 6. workers/youtube-proxy.js の ALLOWED_ORIGINS を更新
+
+本番環境の URL を追加：
+```javascript
+const ALLOWED_ORIGINS = [
+  'http://localhost:8000',
+  'https://your-actual-domain.pages.dev', // ← あなたの実際のURLに変更
+];
+```
+
+### 7. 再デプロイ
+
+```bash
+wrangler deploy
+```
+
+### 8. 動作確認
+
+ブラウザの開発者ツール（F12）→ Console タブで、以下のログが表示されれば成功：
+```
+✓ Custom Worker succeeded
+```
+
 ## 使い方
 
 1. テキストエリアにチャンネルID または チャンネルURL を入力（1行1件）

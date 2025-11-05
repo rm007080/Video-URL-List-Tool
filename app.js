@@ -1,8 +1,26 @@
 // ===== 定数定義 =====
 
+// CORS Proxy 設定
+// 優先順位: 自前Worker > allorigins.win > corsproxy.io
 const PROXY_CONFIG = [
-  { url: 'https://api.allorigins.win/raw?url=', timeout: 10000 },
-  { url: 'https://corsproxy.io/?', timeout: 10000 }
+  {
+    name: 'Custom Worker',
+    url: 'https://youtube-list-tool-proxy.YOUR_SUBDOMAIN.workers.dev/?url=',
+    timeout: 10000,
+    enabled: false // デプロイ後に true に変更
+  },
+  {
+    name: 'AllOrigins',
+    url: 'https://api.allorigins.win/raw?url=',
+    timeout: 10000,
+    enabled: true
+  },
+  {
+    name: 'CorsProxy',
+    url: 'https://corsproxy.io/?',
+    timeout: 10000,
+    enabled: true
+  }
 ];
 
 const CHANNEL_ID_REGEX = /^UC[\w-]{22}$/;
@@ -165,11 +183,14 @@ function normalizeInput(input) {
  * @returns {Promise<string>} - レスポンステキスト
  */
 async function fetchWithProxy(targetUrl, proxyIndex = 0) {
-  if (proxyIndex >= PROXY_CONFIG.length) {
+  // 有効なProxyのみをフィルタリング
+  const enabledProxies = PROXY_CONFIG.filter(p => p.enabled);
+
+  if (proxyIndex >= enabledProxies.length) {
     throw new Error(ERROR_MESSAGES.PROXY_UNAVAILABLE);
   }
 
-  const proxy = PROXY_CONFIG[proxyIndex];
+  const proxy = enabledProxies[proxyIndex];
   const encodedUrl = encodeURIComponent(targetUrl);
   const proxiedUrl = proxy.url + encodedUrl;
 
@@ -187,10 +208,11 @@ async function fetchWithProxy(targetUrl, proxyIndex = 0) {
       throw new Error('Proxy returned HTML error page');
     }
 
+    console.log(`✓ ${proxy.name} succeeded`);
     return text;
 
   } catch (error) {
-    console.warn(`Proxy ${proxyIndex + 1} failed:`, error.message);
+    console.warn(`✗ ${proxy.name} (${proxyIndex + 1}/${enabledProxies.length}) failed:`, error.message);
     return fetchWithProxy(targetUrl, proxyIndex + 1);
   }
 }
