@@ -5,9 +5,9 @@
 const PROXY_CONFIG = [
   {
     name: 'Custom Worker',
-    url: 'https://youtube-list-tool-proxy.YOUR_SUBDOMAIN.workers.dev/?url=',
+    url: 'https://youtube-list-tool-proxy.littlelit-3.workers.dev/?url=',
     timeout: 10000,
-    enabled: false // デプロイ後に true に変更
+    enabled: true // デプロイ後に true に変更
   },
   {
     name: 'AllOrigins',
