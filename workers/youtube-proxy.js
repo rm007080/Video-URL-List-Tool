@@ -35,8 +35,16 @@ export default {
     }
 
     try {
-      // URLパラメータから対象URLを取得
       const url = new URL(request.url);
+      const pathname = url.pathname;
+
+      // エンドポイント分岐: /resolve-channel
+      if (pathname === '/resolve-channel') {
+        return await handleResolveChannel(request, env);
+      }
+
+      // デフォルト: CORS Proxy機能
+      // URLパラメータから対象URLを取得
       const targetUrl = url.searchParams.get('url');
 
       // URLパラメータのバリデーション
@@ -179,4 +187,89 @@ function createErrorResponse(message, status, request) {
       },
     }
   );
+}
+
+/**
+ * @username をチャンネルIDに解決する
+ * @param {Request} request
+ * @param {Object} env - 環境変数（YOUTUBE_API_KEY を含む）
+ * @returns {Promise<Response>}
+ */
+async function handleResolveChannel(request, env) {
+  try {
+    const url = new URL(request.url);
+    const username = url.searchParams.get('username');
+
+    // username パラメータのバリデーション
+    if (!username) {
+      return createErrorResponse('Missing "username" parameter', 400, request);
+    }
+
+    // @ を除去（@mkbhd → mkbhd）
+    const cleanUsername = username.replace(/^@/, '');
+
+    // APIキーの確認
+    if (!env.YOUTUBE_API_KEY) {
+      console.error('YOUTUBE_API_KEY is not set in environment variables');
+      return createErrorResponse('Server configuration error', 500, request);
+    }
+
+    // YouTube Data API v3 でチャンネル情報を取得
+    // forHandle パラメータを使用（@username に対応）
+    const apiUrl = new URL('https://www.googleapis.com/youtube/v3/channels');
+    apiUrl.searchParams.set('part', 'id');
+    apiUrl.searchParams.set('forHandle', cleanUsername);
+    apiUrl.searchParams.set('key', env.YOUTUBE_API_KEY);
+
+    const response = await fetchWithTimeout(apiUrl.toString(), 10000);
+
+    if (!response.ok) {
+      console.error(`YouTube API error: ${response.status} ${response.statusText}`);
+      return createErrorResponse(
+        `YouTube API request failed: ${response.status}`,
+        response.status,
+        request
+      );
+    }
+
+    const data = await response.json();
+
+    // チャンネルが見つからない場合
+    if (!data.items || data.items.length === 0) {
+      return createErrorResponse(
+        `Channel not found for username: @${cleanUsername}`,
+        404,
+        request
+      );
+    }
+
+    // チャンネルIDを返す
+    const channelId = data.items[0].id;
+
+    return new Response(
+      JSON.stringify({
+        username: `@${cleanUsername}`,
+        channelId: channelId,
+      }),
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': getAllowedOrigin(request),
+          'Access-Control-Allow-Methods': 'GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+          'Cache-Control': 'public, max-age=86400', // 24時間キャッシュ（チャンネルIDは変わらない）
+          'X-Proxy-By': 'YouTube-List-Tool-Worker',
+        },
+      }
+    );
+
+  } catch (error) {
+    console.error('Resolve channel error:', error);
+    return createErrorResponse(
+      `Failed to resolve channel: ${error.message}`,
+      500,
+      request
+    );
+  }
 }
