@@ -139,11 +139,61 @@ function truncateTitle(title, maxLength = 30) {
 // ===== 入力正規化 =====
 
 /**
+ * @username をチャンネルIDに解決（Workers経由）
+ * @param {string} username - @username（例: @mkbhd）
+ * @returns {Promise<{ success: boolean, channelId?: string, error?: string }>}
+ */
+async function resolveUsername(username) {
+  try {
+    const cleanUsername = username.replace(/^@/, '');
+    const workerUrl = PROXY_CONFIG.find(proxy => proxy.name === 'Custom Worker' && proxy.enabled);
+
+    if (!workerUrl) {
+      return {
+        success: false,
+        error: '@username の解決には Custom Worker が必要です。設定を確認してください。'
+      };
+    }
+
+    // Workers の /resolve-channel エンドポイントを呼ぶ
+    const apiUrl = workerUrl.url.replace('/?url=', '/resolve-channel') + `?username=${encodeURIComponent(cleanUsername)}`;
+
+    const response = await fetchWithTimeout(apiUrl, 10000);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errorData.error || `@${cleanUsername} のチャンネルが見つかりませんでした。`
+      };
+    }
+
+    const data = await response.json();
+
+    if (!data.channelId) {
+      return {
+        success: false,
+        error: `@${cleanUsername} のチャンネルIDを取得できませんでした。`
+      };
+    }
+
+    return { success: true, channelId: data.channelId };
+
+  } catch (error) {
+    console.error('Username resolution error:', error);
+    return {
+      success: false,
+      error: `@username の解決中にエラーが発生しました: ${error.message}`
+    };
+  }
+}
+
+/**
  * 入力を正規化してチャンネルIDを抽出
  * @param {string} input - ユーザー入力
- * @returns {{ success: boolean, channelId?: string, error?: string }}
+ * @returns {Promise<{ success: boolean, channelId?: string, error?: string }>}
  */
-function normalizeInput(input) {
+async function normalizeInput(input) {
   const trimmed = input.trim();
 
   // 空行チェック
@@ -162,11 +212,12 @@ function normalizeInput(input) {
     return { success: true, channelId: urlMatch[1] };
   }
 
-  // 非対応形式
+  // @username 形式の処理（Workers経由で解決）
   if (trimmed.includes('@')) {
-    return { success: false, error: ERROR_MESSAGES.INVALID_AT };
+    return await resolveUsername(trimmed);
   }
 
+  // 非対応形式
   if (trimmed.includes('/c/')) {
     return { success: false, error: ERROR_MESSAGES.INVALID_C };
   }
@@ -531,7 +582,7 @@ async function runWithLimit(items, limit, task) {
  * @param {string} rawInput - 生の入力文字列
  * @returns {{ valid: Array, invalid: Array }}
  */
-function parseChannelInput(rawInput) {
+async function parseChannelInput(rawInput) {
   const lines = rawInput
     .split('\n')
     .map(line => line.trim())
@@ -541,10 +592,13 @@ function parseChannelInput(rawInput) {
     throw new Error(ERROR_MESSAGES.INPUT_REQUIRED);
   }
 
-  const normalized = lines.map(line => ({
+  // normalizeInput が非同期なので Promise.all を使用
+  const normalizedPromises = lines.map(async line => ({
     original: line,
-    ...normalizeInput(line)
+    ...await normalizeInput(line)
   }));
+
+  const normalized = await Promise.all(normalizedPromises);
 
   return {
     valid: normalized.filter(n => n.success),
@@ -598,8 +652,8 @@ async function handleFetch() {
   setLoadingState(true, '取得中...');
 
   try {
-    // 入力をパース
-    const { valid, invalid } = parseChannelInput(channelInput);
+    // 入力をパース（@username の解決を含む）
+    const { valid, invalid } = await parseChannelInput(channelInput);
 
     // チャンネル情報を取得（Promise pool使用）
     const { results, errors } = await runChannelFetches(valid, limit);
