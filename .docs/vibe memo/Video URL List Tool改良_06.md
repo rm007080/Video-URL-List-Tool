@@ -1616,3 +1616,627 @@
   ☒ 修正した実装計画全体をユーザーに提示して承認を得る                                                      
   ☐ Codexの2回目レビューを受けて実装計画を再修正
 ---
+> 選択肢Bが良いです。 
+
+● ● 了解です！選択肢B（本格版）で進めます。Codexの指摘をすべて反映した完全版を実装しましょう。
+
+● ---
+  📋 フェーズ6実装計画 完全版v2（Codex 2回目レビュー反映済み）
+
+  ---
+  🎯 目的
+
+  YouTube RSSの15件制限を超えて、段階的に大量の動画を取得できるシステムを構築する
+
+  ---
+  🔄 実装戦略の変更
+
+  旧戦略（v1）
+
+  - 15件以下 → RSS
+  - 15件超 → API（一度に全件返却）
+
+  新戦略（v2）⭐推奨
+
+  - 15件以下 → RSS（高速、クォータ消費なし）
+  - 15件超 → API（段階的ロード方式）
+    - 初回: 50件取得 + nextPageToken 返却
+    - 「さらに読み込む」ボタンで追加取得
+    - ブラウザの負荷分散、メモリ節約
+
+  ---
+  📂 変更ファイル一覧（優先順位順）
+
+  | ファイル                     | 変更内容                  | 行数目安      | 重要度 |
+  |--------------------------|-----------------------|-----------|-----|
+  | workers/youtube-proxy.js | ページング対応、早期打ち切り、CORS改善 | 600行      | ⭐⭐⭐ |
+  | app.js                   | 段階的ロード、仮想リスト、進捗表示     | +150〜200行 | ⭐⭐⭐ |
+  | index.html               | UI拡張（進捗表示、キャンセルボタン）   | +40行      | ⭐⭐  |
+  | style.css                | プログレスバー、仮想リストスタイル     | +50行      | ⭐⭐  |
+  | README.md                | 新機能の説明                | +50行      | ⭐   |
+
+  ---
+  📝 詳細実装内容
+
+  ---
+  1️⃣ workers/youtube-proxy.js（約600行）
+
+  🔄 主な変更点
+
+  1. ページング対応: 1回のリクエストで50件 + nextPageToken を返す
+  2. 早期打ち切り: startDateパラメータで不要なAPI呼び出しを削減
+  3. CORS改善: プレビュー環境対応、プリフライト対応
+  4. レート制限の永続化: Durable Objects使用（後述）
+  5. 部分結果の明示: partial: true フラグ
+
+  新しいレスポンス形式
+
+  {
+    "ok": true,
+    "channelId": "UCxxxxxx",
+    "count": 50,           // 今回返却した件数
+    "totalFetched": 150,   // これまでの累計取得件数
+    "partial": true,       // まだ続きがある
+    "nextPageToken": "CAoQAA",  // 次のページトークン
+    "videos": [
+      {
+        "url": "https://www.youtube.com/watch?v=abc123",
+        "title": "動画タイトル",
+        "published": "2025-10-01T12:00:00Z"
+      },
+      // ... 50件
+    ]
+  }
+
+  新しいエンドポイント仕様
+
+  GET /fetch-videos?channelId=UCxxxxxx&limit=50&startDate=2024-01-01&pageToken=CAoQAA
+
+  パラメータ:
+  - channelId: チャンネルID（必須）
+  - limit: 1回あたりの取得件数（デフォルト: 50、最大: 50）
+  - startDate: 日付範囲の開始日（YYYY-MM-DD、省略可）
+  - endDate: 日付範囲の終了日（YYYY-MM-DD、省略可）
+  - pageToken: 続きを取得する場合のトークン（省略可）
+
+  CORS改善
+
+  // 正規表現パターン対応でプレビュー環境も許可
+  const ALLOWED_ORIGINS = [
+    'https://youtubelisttool.pages.dev',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+  ];
+
+  function isOriginAllowed(origin) {
+    if (!origin) return false;
+    if (ALLOWED_ORIGINS.includes(origin)) return true;
+    // プレビュー環境: https://xxxx.youtubelisttool.pages.dev
+    if (/^https:\/\/[a-z0-9-]+\.youtubelisttool\.pages\.dev$/.test(origin)) {
+      return true;
+    }
+    return false;
+  }
+
+  早期打ち切りロジック
+
+  async function fetchPlaylistItems(playlistId, limit, startDate, endDate, pageToken, env) {
+    const items = [];
+    let nextPageToken = pageToken || null;
+    let pages = 0;
+    const MAX_PAGES = 10; // 1回のリクエストで最大500件（50件×10ページ）
+    const startTime = Date.now();
+    const MAX_MS = 30000; // 30秒タイムアウト
+
+    // 日付フィルター（早期打ち切り用）
+    const startTs = startDate ? new Date(startDate + 'T00:00:00Z').getTime() : null;
+    const endTs = endDate ? new Date(endDate + 'T23:59:59Z').getTime() : null;
+
+    do {
+      // タイムアウトチェック
+      if (Date.now() - startTime > MAX_MS) {
+        console.warn('Timeout reached, returning partial results');
+        break;
+      }
+
+      // API呼び出し（省略: 前回と同じ）
+      const data = await response.json();
+      const validItems = (data.items || []).filter(
+        (item) => item?.snippet?.resourceId?.videoId
+      );
+
+      // 早期打ち切り判定（日付範囲外になったら停止）
+      if (startTs) {
+        const oldestInBatch = validItems[validItems.length - 1];
+        if (oldestInBatch) {
+          const oldestTs = new Date(oldestInBatch.snippet.publishedAt).getTime();
+          if (oldestTs < startTs) {
+            console.log('Reached startDate boundary, stopping pagination');
+            // startDate以降のアイテムのみ追加
+            const filtered = validItems.filter(item => {
+              const ts = new Date(item.snippet.publishedAt).getTime();
+              return ts >= startTs;
+            });
+            items.push(...filtered);
+            nextPageToken = null; // 停止
+            break;
+          }
+        }
+      }
+
+      items.push(...validItems);
+      nextPageToken = data.nextPageToken;
+      pages++;
+
+    } while (nextPageToken && items.length < limit && pages < MAX_PAGES);
+
+    // limit適用
+    const result = items.slice(0, limit);
+
+    return {
+      items: result,
+      nextPageToken: nextPageToken || null,
+      partial: !!nextPageToken,
+    };
+  }
+
+  レート制限の永続化（Durable Objects使用）
+
+  wrangler.toml に追加:
+  [[durable_objects.bindings]]
+  name = "RATE_LIMITER"
+  class_name = "RateLimiter"
+  script_name = "youtube-proxy"
+
+  [[migrations]]
+  tag = "v1"
+  new_classes = ["RateLimiter"]
+
+  Durable Object実装:
+  export class RateLimiter {
+    constructor(state, env) {
+      this.state = state;
+    }
+
+    async fetch(request) {
+      const url = new URL(request.url);
+      const key = url.searchParams.get('key'); // 例: "IP:PATH"
+      const limit = parseInt(url.searchParams.get('limit') || '60', 10);
+      const windowMs = parseInt(url.searchParams.get('windowMs') || '60000', 10);
+
+      const now = Date.now();
+      const stateKey = `rl:${key}`;
+      let entry = await this.state.storage.get(stateKey);
+
+      if (!entry || entry.reset <= now) {
+        entry = { count: 0, reset: now + windowMs };
+      }
+
+      entry.count += 1;
+      await this.state.storage.put(stateKey, entry);
+
+      const remaining = Math.max(0, limit - entry.count);
+      const limited = entry.count > limit;
+      const retryAfterSec = Math.ceil((entry.reset - now) / 1000);
+
+      return new Response(JSON.stringify({ limited, remaining, retryAfterSec }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  }
+
+  ---
+  2️⃣ app.js（約+150〜200行）
+
+  🔄 主な変更点
+
+  1. 段階的ロード: 初回50件 → 「さらに読み込む」で追加取得
+  2. 進捗表示: 取得件数/推定残り件数/キャンセルボタン
+  3. 仮想リスト: 大量データでもスムーズに表示
+  4. AbortController: キャンセル機能
+
+  新しいグローバル変数
+
+  // 段階的ロード用の状態管理
+  let loadingState = {
+    isLoading: false,
+    isCancelled: false,
+    abortController: null,
+    currentChannels: [],
+    allVideos: [],
+    nextPageTokens: {}, // { channelId: nextPageToken }
+    hasMore: false,
+  };
+
+  段階的ロード実装
+
+  async function fetchChannelVideosAPI(channelId, limit, dateRange, pageToken = null) {
+    const workerUrl = 'https://youtube-list-tool-proxy.littlelit-3.workers.dev';
+    const params = new URLSearchParams({
+      channelId,
+      limit: limit === -1 ? '50' : String(Math.min(limit, 50)),
+    });
+
+    if (dateRange.startDate) params.set('startDate', dateRange.startDate);
+    if (dateRange.endDate) params.set('endDate', dateRange.endDate);
+    if (pageToken) params.set('pageToken', pageToken);
+
+    const url = `${workerUrl}/fetch-videos?${params}`;
+
+    const response = await fetch(url, {
+      signal: loadingState.abortController?.signal,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const error = new Error(errorData.error?.message || 'API error');
+      error.code = errorData.error?.code;
+      throw error;
+    }
+
+    const data = await response.json();
+
+    return {
+      videos: data.videos,
+      nextPageToken: data.nextPageToken || null,
+      partial: data.partial || false,
+      totalFetched: data.totalFetched || data.count,
+    };
+  }
+
+  「さらに読み込む」ボタン処理
+
+  async function loadMoreVideos() {
+    if (loadingState.isLoading || !loadingState.hasMore) return;
+
+    loadingState.isLoading = true;
+    showLoadingIndicator('追加の動画を取得中...');
+
+    try {
+      const limit = parseInt(document.getElementById('limitSelect').value, 10);
+      const dateRange = getDateRange();
+
+      // 各チャンネルの続きを取得
+      for (const channelId of loadingState.currentChannels) {
+        const pageToken = loadingState.nextPageTokens[channelId];
+        if (!pageToken) continue;
+
+        const result = await fetchChannelVideosAPI(channelId, 50, dateRange, pageToken);
+
+        // 動画を追加
+        loadingState.allVideos.push(...result.videos);
+
+        // nextPageToken更新
+        if (result.nextPageToken) {
+          loadingState.nextPageTokens[channelId] = result.nextPageToken;
+        } else {
+          delete loadingState.nextPageTokens[channelId];
+        }
+      }
+
+      // まだ続きがあるかチェック
+      loadingState.hasMore = Object.keys(loadingState.nextPageTokens).length > 0;
+
+      // 結果を再描画
+      displayVideos(loadingState.allVideos);
+      updateLoadMoreButton();
+
+    } catch (error) {
+      handleError(error);
+    } finally {
+      loadingState.isLoading = false;
+      hideLoadingIndicator();
+    }
+  }
+
+  進捗表示とキャンセルボタン
+
+  function showProgressWithCancel(current, total, channelName) {
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const cancelButton = document.getElementById('cancelButton');
+
+    progressContainer.classList.remove('hidden');
+
+    const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
+    progressBar.style.width = `${percentage}%`;
+
+    progressText.textContent = `${current}件取得済み`;
+    if (channelName) {
+      progressText.textContent += ` (チャンネル: ${channelName})`;
+    }
+
+    // キャンセルボタンの表示
+    cancelButton.classList.remove('hidden');
+    cancelButton.onclick = () => {
+      loadingState.isCancelled = true;
+      loadingState.abortController?.abort();
+      progressText.textContent = 'キャンセル中...';
+      cancelButton.disabled = true;
+    };
+  }
+
+  仮想リスト実装（Virtual Scroll）
+
+  // 仮想リスト用のクラス
+  class VirtualList {
+    constructor(container, items, rowHeight, renderItem) {
+      this.container = container;
+      this.items = items;
+      this.rowHeight = rowHeight;
+      this.renderItem = renderItem;
+      this.visibleStart = 0;
+      this.visibleEnd = 0;
+      this.init();
+    }
+
+    init() {
+      // コンテナの高さを設定
+      const totalHeight = this.items.length * this.rowHeight;
+      this.container.style.height = `${Math.min(totalHeight, 600)}px`;
+      this.container.style.overflow = 'auto';
+      this.container.style.position = 'relative';
+
+      // スクロールイベント
+      this.container.addEventListener('scroll', () => this.onScroll());
+
+      // 初回描画
+      this.render();
+    }
+
+    onScroll() {
+      const scrollTop = this.container.scrollTop;
+      this.visibleStart = Math.floor(scrollTop / this.rowHeight);
+      this.visibleEnd = Math.ceil((scrollTop + this.container.clientHeight) / this.rowHeight);
+      this.render();
+    }
+
+    render() {
+      const fragment = document.createDocumentFragment();
+      const buffer = 5; // 前後5件余分に描画
+
+      for (let i = Math.max(0, this.visibleStart - buffer);
+           i < Math.min(this.items.length, this.visibleEnd + buffer);
+           i++) {
+        const item = this.items[i];
+        const el = this.renderItem(item, i);
+        el.style.position = 'absolute';
+        el.style.top = `${i * this.rowHeight}px`;
+        el.style.left = '0';
+        el.style.right = '0';
+        fragment.appendChild(el);
+      }
+
+      this.container.innerHTML = '';
+      this.container.appendChild(fragment);
+    }
+  }
+
+  // 使用例
+  function displayVideosWithVirtualList(videos) {
+    const container = document.getElementById('videoListContainer');
+
+    new VirtualList(container, videos, 60, (video, index) => {
+      const div = document.createElement('div');
+      div.className = 'video-item';
+      div.innerHTML = `
+        <div class="video-index">${index + 1}</div>
+        <div class="video-title">${escapeHtml(video.title)}</div>
+        <div class="video-date">${formatDate(video.published)}</div>
+      `;
+      return div;
+    });
+  }
+
+  ---
+  3️⃣ index.html（約+40行）
+
+  進捗表示とキャンセルボタンの追加
+
+  <!-- 進捗表示コンテナ -->
+  <div id="progressContainer" class="progress-container hidden">
+    <div class="progress-header">
+      <span id="progressText">動画を取得中...</span>
+      <button id="cancelButton" class="cancel-button">キャンセル</button>
+    </div>
+    <div class="progress-bar-container">
+      <div id="progressBar" class="progress-bar"></div>
+    </div>
+  </div>
+
+  <!-- 仮想リスト用コンテナ -->
+  <div id="videoListContainer" class="video-list-container"></div>
+
+  <!-- さらに読み込むボタン -->
+  <button id="loadMoreButton" class="load-more-button hidden" onclick="loadMoreVideos()">
+    さらに読み込む（残り: <span id="remainingCount">?</span>件）
+  </button>
+
+  <!-- 件数選択の変更 -->
+  <select id="limitSelect">
+    <option value="15">最新15件（RSS - 高速）</option>
+    <option value="50">最新50件（API使用 - 段階的ロード）</option>
+    <option value="100">最新100件（API使用 - 段階的ロード）</option>
+    <option value="500">最新500件（API使用 - 段階的ロード）</option>
+    <option value="-1">全件（API使用 - 段階的ロード、時間がかかります）</option>
+  </select>
+
+  <!-- API使用に関する注意 -->
+  <div class="info-box warning-box" style="margin-top: 1rem;">
+    <strong>⚠️ API使用に関する注意:</strong><br>
+    50件以上の取得にはYouTube Data API v3を使用します。<br>
+    ・段階的ロード: 初回50件 → 「さらに読み込む」で追加取得<br>
+    ・無料枠: 1日10,000クォータ<br>
+    ・クォータ消費: 50件ごとに1クォータ<br>
+    ・取得時間: 50件≈2秒（環境により変動）
+  </div>
+
+  ---
+  4️⃣ style.css（約+50行）
+
+  /* 進捗表示 */
+  .progress-container {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+  }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background-color: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background-color: var(--primary-color);
+    transition: width 0.3s ease;
+  }
+
+  .cancel-button {
+    padding: 0.5rem 1rem;
+    background-color: var(--error-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .cancel-button:hover {
+    opacity: 0.8;
+  }
+
+  .cancel-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* 仮想リスト */
+  .video-list-container {
+    position: relative;
+    margin: 1rem 0;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+  }
+
+  .video-item {
+    display: flex;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s;
+  }
+
+  .video-item:hover {
+    background-color: var(--bg-hover);
+  }
+
+  .video-index {
+    min-width: 50px;
+    font-weight: bold;
+    color: var(--text-secondary);
+  }
+
+  .video-title {
+    flex: 1;
+    margin: 0 1rem;
+  }
+
+  .video-date {
+    min-width: 180px;
+    text-align: right;
+    color: var(--text-secondary);
+    font-size: 0.9em;
+  }
+
+  /* さらに読み込むボタン */
+  .load-more-button {
+    display: block;
+    margin: 2rem auto;
+    padding: 1rem 2rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .load-more-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .load-more-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  ---
+  5️⃣ README.md（約+50行追加）
+
+  新機能の説明、クォータ管理、段階的ロードの使い方を追加（前回と同様のため省略）
+
+  ---
+  ⏱️ 推定作業時間：12〜15時間
+
+  | タスク                              | 時間    |
+  |----------------------------------|-------|
+  | Workers実装（ページング、早期打ち切り、CORS改善）   | 3時間   |
+  | Durable Objects実装（レート制限永続化）      | 2時間   |
+  | app.js実装（段階的ロード、AbortController） | 2.5時間 |
+  | 仮想リスト実装                          | 2時間   |
+  | UI拡張（進捗表示、キャンセルボタン）              | 1.5時間 |
+  | スタイル調整                           | 1時間   |
+  | README更新                         | 0.5時間 |
+  | ローカルテスト                          | 2時間   |
+  | 統合テスト                            | 1.5時間 |
+  | 合計                               | 15時間  |
+
+  ---
+  🧪 テストケース（追加）
+
+  | テストケース              | 期待結果                |
+  |---------------------|---------------------|
+  | 段階的ロード（50件×3回）      | 正しく追加取得、重複なし        |
+  | キャンセル機能             | 即座に停止、部分結果を表示       |
+  | 早期打ち切り（startDate指定） | API呼び出し回数が減る        |
+  | 仮想リスト（5000件）        | スムーズにスクロール、メモリ節約    |
+  | プレビュー環境CORS         | プレビューURLからアクセス可能    |
+  | レート制限の永続性           | Worker再起動後もレート制限が維持 |
+
+  ---
+  📞 次のステップ
+
+  この実装計画（完全版v2）を承認いただければ、以下の順序で実装を進めます：
+
+  1. Durable Objects設定 → wrangler.toml更新
+  2. Workers実装 → ページング、早期打ち切り、CORS改善
+  3. app.js実装 → 段階的ロード、仮想リスト
+  4. UI実装 → 進捗表示、キャンセルボタン
+  5. テスト
+  6. README更新
+  7. Git commit & push（ユーザーが手動実行）
+
+  ---
+  承認いただければ、実装を開始します！質問や変更したい点はありますか？
+                                                                                                            
+  Todos                                                                                                     
+  ☐ Codexの2回目レビューを受けて実装計画を再修正                                                            
+---
