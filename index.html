@@ -42,6 +42,29 @@
       </select>
     </div>
 
+    <fieldset class="form-group date-filter-fieldset">
+      <legend class="date-filter-legend">📅 日付範囲フィルター（オプション）</legend>
+
+      <div class="date-range-container">
+        <div class="date-input-group">
+          <label for="startDate" class="date-label">開始日:</label>
+          <input type="date" id="startDate" class="date-input" max="">
+        </div>
+
+        <div class="date-input-group">
+          <label for="endDate" class="date-label">終了日:</label>
+          <input type="date" id="endDate" class="date-input" max="">
+        </div>
+
+        <button type="button" id="clearDates" class="clear-dates-btn">クリア</button>
+      </div>
+
+      <p class="date-hint">
+        💡 範囲を指定すると、その期間内の動画のみを表示します（空欄の場合は全件取得）<br>
+        <small>※ YouTube RSSは最新15件のみを返します。古い日付を指定しても0件になる場合があります。</small>
+      </p>
+    </fieldset>
+
     <button id="fetchButton">取得</button>
 
     <div id="loading" class="loading" role="status" aria-live="polite" hidden>

@@ -1,7 +1,7 @@
 /* ===== CSS変数定義 ===== */
 /* ライトモード（デフォルト） */
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 
   /* 背景色 */
   --bg-primary: #f5f5f5;
@@ -50,6 +50,11 @@
   /* エクスポートボックス */
   --export-bg: #f9f9f9;
   --export-border: #4caf50;
+}
+
+/* ライトモード（手動設定時） */
+[data-theme="light"] {
+  color-scheme: light;
 }
 
 /* ダークモード */
@@ -446,4 +451,124 @@ button:disabled {
 .theme-toggle:focus {
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
+}
+
+/* ===== 日付範囲フィルター ===== */
+
+/* fieldset のスタイル */
+.date-filter-fieldset {
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 20px;
+  transition: border-color 0.3s ease;
+}
+
+.date-filter-legend {
+  font-weight: bold;
+  color: var(--text-primary);
+  padding: 0 8px;
+  font-size: 16px;
+  transition: color 0.3s ease;
+}
+
+/* 日付入力コンテナ */
+.date-range-container {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.date-label {
+  font-size: 14px;
+  font-weight: normal;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+.date-input {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color-light);
+  border-radius: 4px;
+  background-color: var(--bg-container);
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.date-input:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* クリアボタン */
+.clear-dates-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  background-color: var(--text-tertiary);
+  color: white;
+  height: fit-content;
+  transition: background-color 0.3s ease;
+}
+
+.clear-dates-btn:hover {
+  background-color: var(--text-secondary);
+}
+
+/* ヒントテキスト */
+.date-hint {
+  margin-top: 8px;
+  margin-bottom: 0;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  font-style: italic;
+  line-height: 1.5;
+  transition: color 0.3s ease;
+}
+
+.date-hint small {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 600px) {
+  .date-range-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .date-input-group {
+    min-width: 100%;
+  }
+
+  .clear-dates-btn {
+    width: 100%;
+  }
+}
+
+/* ===== WebKitフォールバック（古いSafari対策） ===== */
+
+/* ライトモード：カレンダーアイコンをデフォルト表示 */
+:root[data-theme="light"] .date-input::-webkit-calendar-picker-indicator {
+  filter: none;
+}
+
+/* ダークモード：カレンダーアイコンを反転して明るく */
+:root[data-theme="dark"] .date-input::-webkit-calendar-picker-indicator {
+  filter: brightness(0) invert(1);
 }
