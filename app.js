@@ -1,3 +1,65 @@
+// ===== ダークモード管理 =====
+
+/**
+ * テーマを設定する
+ * @param {string} theme - 'light' または 'dark'
+ * @param {boolean} saveToStorage - localStorageに保存するか（デフォルト: true）
+ */
+function setTheme(theme, saveToStorage = true) {
+  const root = document.documentElement;
+  const themeIcon = document.getElementById('themeIcon');
+
+  if (theme === 'dark') {
+    root.setAttribute('data-theme', 'dark');
+    if (themeIcon) themeIcon.textContent = '☀️';
+  } else {
+    root.setAttribute('data-theme', 'light');
+    if (themeIcon) themeIcon.textContent = '🌙';
+  }
+
+  // localStorageに保存（手動設定の場合のみ）
+  if (saveToStorage) {
+    localStorage.setItem('theme', theme);
+  }
+}
+
+/**
+ * テーマを切り替える（ユーザーの手動操作）
+ */
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  setTheme(newTheme, true); // 手動設定なので保存する
+}
+
+/**
+ * 保存されたテーマまたはシステム設定を読み込む
+ */
+function initTheme() {
+  // localStorageから読み込み
+  const savedTheme = localStorage.getItem('theme');
+
+  if (savedTheme) {
+    // 保存されたテーマを適用（localStorageには再保存しない）
+    setTheme(savedTheme, false);
+  } else {
+    // システム設定を検出（localStorageには保存しない）
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setTheme(prefersDark ? 'dark' : 'light', false);
+  }
+}
+
+// ページ読み込み時にテーマを初期化（即座に実行してちらつき防止）
+initTheme();
+
+// システム設定の変更を監視
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+  // ユーザーが手動で設定していない場合のみ、システム設定に追従
+  if (!localStorage.getItem('theme')) {
+    setTheme(e.matches ? 'dark' : 'light', false);
+  }
+});
+
 // ===== 定数定義 =====
 
 // CORS Proxy 設定
@@ -699,3 +761,14 @@ async function handleFetch() {
 // ===== イベントリスナー =====
 
 UI.fetchButton.addEventListener('click', handleFetch);
+
+// ダークモードトグルボタン
+document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+
+// キーボードアクセシビリティ（Enterキーでも切り替え）
+document.getElementById('themeToggle')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    toggleTheme();
+  }
+});
