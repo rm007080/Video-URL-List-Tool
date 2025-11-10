@@ -7,7 +7,8 @@
       "mcp__serena__list_memories",
       "mcp__serena__activate_project",
       "mcp__serena__check_onboarding_performed",
-      "Read(//mnt/c/Users/littl/OneDrive/Pictures/Screenshots/**)"
+      "Read(//mnt/c/Users/littl/OneDrive/Pictures/Screenshots/**)",
+      "Bash(cp:*)"
     ],
     "deny": [],
     "ask": []
