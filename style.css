@@ -1,7 +1,149 @@
-/* ダークモード自動変換を無効化（常にライトモードで表示） */
+/* ===== CSS変数定義 ===== */
+/* ライトモード（デフォルト） */
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
+
+  /* 背景色 */
+  --bg-primary: #f5f5f5;
+  --bg-secondary: #fafafa;
+  --bg-container: #ffffff;
+
+  /* テキスト色 */
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+
+  /* ボーダー・シャドウ */
+  --border-color: #e0e0e0;
+  --border-color-light: #dddddd;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+
+  /* アクセントカラー */
+  --accent-color: #4caf50;
+  --accent-hover: #45a049;
+  --accent-disabled: #cccccc;
+
+  /* エラー */
+  --error-color: #f44336;
+  --error-dark: #c62828;
+  --error-bg: #ffebee;
+  --error-border: #f44336;
+
+  /* 情報 */
+  --info-bg: #e3f2fd;
+  --info-border: #2196f3;
+  --warning-bg: #fff3cd;
+  --warning-border: #ffc107;
+
+  /* コードブロック */
+  --code-bg: #263238;
+  --code-text: #f4ffd7;
+
+  /* ボタン */
+  --btn-primary: #2196f3;
+  --btn-primary-hover: #1976d2;
+  --btn-success: #4caf50;
+  --btn-success-hover: #45a049;
+  --btn-warning: #ff9800;
+  --btn-warning-hover: #fb8c00;
+
+  /* エクスポートボックス */
+  --export-bg: #f9f9f9;
+  --export-border: #4caf50;
 }
+
+/* ダークモード */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* 背景色 */
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --bg-container: #1e1e1e;
+
+  /* テキスト色 */
+  --text-primary: #e0e0e0;
+  --text-secondary: #b0b0b0;
+  --text-tertiary: #808080;
+
+  /* ボーダー・シャドウ */
+  --border-color: #333333;
+  --border-color-light: #404040;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+
+  /* アクセントカラー */
+  --accent-color: #66bb6a;
+  --accent-hover: #81c784;
+  --accent-disabled: #555555;
+
+  /* エラー */
+  --error-color: #ef5350;
+  --error-dark: #e53935;
+  --error-bg: #3d1f1f;
+  --error-border: #ef5350;
+
+  /* 情報 */
+  --info-bg: #1a2331;
+  --info-border: #42a5f5;
+  --warning-bg: #332b1f;
+  --warning-border: #ffb74d;
+
+  /* コードブロック */
+  --code-bg: #1a1a1a;
+  --code-text: #c9d1d9;
+
+  /* ボタン */
+  --btn-primary: #42a5f5;
+  --btn-primary-hover: #64b5f6;
+  --btn-success: #66bb6a;
+  --btn-success-hover: #81c784;
+  --btn-warning: #ffa726;
+  --btn-warning-hover: #ffb74d;
+
+  /* エクスポートボックス */
+  --export-bg: #1a1a1a;
+  --export-border: #66bb6a;
+}
+
+/* システム設定に応じて自動切り替え（手動設定がない場合） */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+
+    --bg-primary: #121212;
+    --bg-secondary: #1e1e1e;
+    --bg-container: #1e1e1e;
+    --text-primary: #e0e0e0;
+    --text-secondary: #b0b0b0;
+    --text-tertiary: #808080;
+    --border-color: #333333;
+    --border-color-light: #404040;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --accent-color: #66bb6a;
+    --accent-hover: #81c784;
+    --accent-disabled: #555555;
+    --error-color: #ef5350;
+    --error-dark: #e53935;
+    --error-bg: #3d1f1f;
+    --error-border: #ef5350;
+    --info-bg: #1a2331;
+    --info-border: #42a5f5;
+    --warning-bg: #332b1f;
+    --warning-border: #ffb74d;
+    --code-bg: #1a1a1a;
+    --code-text: #c9d1d9;
+    --btn-primary: #42a5f5;
+    --btn-primary-hover: #64b5f6;
+    --btn-success: #66bb6a;
+    --btn-success-hover: #81c784;
+    --btn-warning: #ffa726;
+    --btn-warning-hover: #ffb74d;
+    --export-bg: #1a1a1a;
+    --export-border: #66bb6a;
+  }
+}
+
+/* ===== 基本スタイル ===== */
 
 * {
   margin: 0;
@@ -11,36 +153,45 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  background-color: #f5f5f5;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   padding: 20px;
   line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .container {
   max-width: 800px;
   margin: 0 auto;
-  background: white;
+  background: var(--bg-container);
   padding: 30px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px var(--shadow-color);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 h1 {
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 10px;
 }
 
 .description {
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 20px;
 }
 
 .info-box {
-  background-color: #e3f2fd;
-  border-left: 4px solid #2196f3;
+  background-color: var(--info-bg);
+  border-left: 4px solid var(--info-border);
   padding: 12px;
   margin-bottom: 20px;
   font-size: 14px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.warning-box {
+  background-color: var(--warning-bg);
+  border-left-color: var(--warning-border);
 }
 
 .form-group {
@@ -51,29 +202,45 @@ label {
   display: block;
   font-weight: bold;
   margin-bottom: 8px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 textarea {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color-light);
   border-radius: 4px;
   font-family: monospace;
   font-size: 14px;
   resize: vertical;
+  background-color: var(--bg-container);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--accent-color);
 }
 
 select {
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color-light);
   border-radius: 4px;
   font-size: 14px;
   cursor: pointer;
+  background-color: var(--bg-container);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--accent-color);
 }
 
 button {
-  background-color: #4caf50;
+  background-color: var(--accent-color);
   color: white;
   padding: 12px 24px;
   border: none;
@@ -85,11 +252,11 @@ button {
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: var(--accent-hover);
 }
 
 button:disabled {
-  background-color: #cccccc;
+  background-color: var(--accent-disabled);
   cursor: not-allowed;
 }
 
@@ -131,32 +298,35 @@ button:disabled {
 }
 
 .error-item {
-  background-color: #ffebee;
-  border-left: 4px solid #f44336;
+  background-color: var(--error-bg);
+  border-left: 4px solid var(--error-border);
   padding: 12px;
   margin-bottom: 10px;
   border-radius: 4px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .error-item strong {
-  color: #c62828;
+  color: var(--error-dark);
 }
 
 .channel-section {
   margin-bottom: 30px;
   padding: 20px;
-  background-color: #fafafa;
+  background-color: var(--bg-secondary);
   border-radius: 4px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .channel-header {
   font-size: 18px;
   font-weight: bold;
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 15px;
   padding-bottom: 10px;
-  border-bottom: 2px solid #4caf50;
+  border-bottom: 2px solid var(--accent-color);
+  transition: color 0.3s ease, border-color 0.3s ease;
 }
 
 .output-block {
@@ -165,13 +335,13 @@ button:disabled {
 
 .output-block h3 {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 8px;
 }
 
 .output-block pre {
-  background-color: #263238;
-  color: #f4ffd7;
+  background-color: var(--code-bg);
+  color: var(--code-text);
   padding: 15px;
   border-radius: 4px;
   overflow-x: auto;
@@ -180,6 +350,7 @@ button:disabled {
   line-height: 1.5;
   white-space: pre-wrap;
   word-wrap: break-word;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .output-block pre code {
@@ -191,20 +362,21 @@ button:disabled {
 .export-buttons {
   margin-top: 30px;
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: var(--export-bg);
   border-radius: 8px;
-  border: 2px dashed #4caf50;
+  border: 2px dashed var(--export-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .export-buttons h3 {
   margin-top: 0;
   margin-bottom: 15px;
-  color: #333;
+  color: var(--text-primary);
   font-size: 16px;
 }
 
 .export-btn {
-  background-color: #2196f3;
+  background-color: var(--btn-primary);
   color: white;
   padding: 10px 20px;
   border: none;
@@ -218,21 +390,60 @@ button:disabled {
 }
 
 .export-btn:hover {
-  background-color: #1976d2;
+  background-color: var(--btn-primary-hover);
 }
 
 .export-csv {
-  background-color: #4caf50;
+  background-color: var(--btn-success);
 }
 
 .export-csv:hover {
-  background-color: #45a049;
+  background-color: var(--btn-success-hover);
 }
 
 .export-json {
-  background-color: #ff9800;
+  background-color: var(--btn-warning);
 }
 
 .export-json:hover {
-  background-color: #fb8c00;
+  background-color: var(--btn-warning-hover);
+}
+
+/* ダークモードトグルボタン */
+.theme-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: var(--bg-container);
+  border: 2px solid var(--border-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 4px 12px var(--shadow-color);
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px var(--shadow-color);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
+.theme-toggle-icon {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* アクセシビリティ: キーボードフォーカス */
+.theme-toggle:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
 }
