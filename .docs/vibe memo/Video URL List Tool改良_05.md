@@ -2036,4 +2036,731 @@
   ☒ ローカル環境でテスト（日付範囲、バリデーション、ダークモード）
   ☐ Git commit & push
   ---
+  > 修正したいので実装計画を立て、Codex MCPにレビューを依頼して 
+
+● 了解しました！ライトモードでカレンダーアイコンが見えない問題の修正計画を立て、Codex MCPにレビューを依頼します。
+
+● ---
+  📋 カレンダーアイコン表示問題の修正計画
+
+  🐛 問題の詳細
+
+  現象
+
+  - ライトモード: 日付入力欄（<input type="date">）のカレンダーアイコンが背景と同色で見えない
+  - ダークモード: カレンダーアイコンは正常に表示される
+
+  原因
+
+  .date-input {
+    background-color: var(--bg-container); /* #ffffff (ライト) */
+    color: var(--text-primary);
+  }
+
+  - color プロパティはテキストの色を制御するが、ブラウザのネイティブUI（カレンダーアイコン）の色は制御できない
+  - ブラウザのデフォルトでは、カレンダーアイコンの色が自動的に決まる
+  - ライトモードで白背景の場合、アイコンも白っぽくなってしまう可能性がある
+
+  ---
+  🎯 修正方針
+
+  CSS color-scheme プロパティを使用
+
+  color-scheme は、ブラウザのネイティブUIコントロール（カレンダーアイコン、スクロールバー、フォームコントロールなど）の色を制御するCSS標準プロパティです。
+
+  メリット:
+  - ✅ ブラウザ標準の機能を使用（互換性が高い）
+  - ✅ ダークモードと一貫した動作
+  - ✅ コード量が少ない
+  - ✅ メンテナンスが容易
+
+  デメリット:
+  - 古いブラウザ（IE11など）では非対応（ただし、グレースフルデグラデーション）
+
+  ---
+  📝 実装内容
+
+  style.css への追加
+
+  /* ===== 日付入力のカレンダーアイコン表示修正 ===== */
+
+  /*
+   * color-scheme プロパティを使用してブラウザのネイティブUI（カレンダーアイコン）の色を制御
+   * ライトモード: light → アイコンが暗い色
+   * ダークモード: dark → アイコンが明るい色
+   */
+
+  /* ライトモード専用：カレンダーアイコンを暗くする */
+  :root[data-theme="light"] .date-input {
+    color-scheme: light;
+  }
+
+  /* ダークモード専用：カレンダーアイコンを明るくする */
+  [data-theme="dark"] .date-input {
+    color-scheme: dark;
+  }
+
+  /* システム設定がライトの場合（手動設定なし） */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme]) .date-input {
+      color-scheme: light;
+    }
+  }
+
+  /* システム設定がダークの場合（手動設定なし） */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .date-input {
+      color-scheme: dark;
+    }
+  }
+
+  配置場所: style.css の日付範囲フィルターセクション（line 451以降）の末尾
+
+  ---
+  🔍 技術的な詳細
+
+  color-scheme プロパティとは？
+
+  MDN Reference: https://developer.mozilla.org/en-US/docs/Web/CSS/color-scheme
+
+  仕様:
+  - CSS Color Adjustment Module Level 1
+  - ブラウザのネイティブUIコントロールの配色を制御
+  - 値: normal | light | dark | light dark
+
+  対応ブラウザ:
+  - Chrome 81+ ✅
+  - Edge 81+ ✅
+  - Firefox 96+ ✅
+  - Safari 13+ ✅
+  - Opera 68+ ✅
+
+  例:
+  /* ライトモード */
+  color-scheme: light;
+  /* → カレンダーアイコン: 暗い色（黒っぽい）*/
+  /* → スクロールバー: ライト配色 */
+
+  /* ダークモード */
+  color-scheme: dark;
+  /* → カレンダーアイコン: 明るい色（白っぽい）*/
+  /* → スクロールバー: ダーク配色 */
+
+  ---
+  🧪 テスト計画
+
+  テストケース
+
+  1. ライトモード
+
+  - カレンダーアイコンが見える（暗い色）
+  - テキスト入力が正常
+  - 日付選択が正常
+  - ホバー時の表示
+
+  2. ダークモード
+
+  - カレンダーアイコンが見える（明るい色）
+  - テキスト入力が正常
+  - 日付選択が正常
+  - ホバー時の表示
+
+  3. システム設定追従
+
+  - OS設定がライト → カレンダーアイコンが暗い
+  - OS設定がダーク → カレンダーアイコンが明るい
+
+  4. ブラウザ互換性
+
+  - Chrome
+  - Firefox
+  - Safari（可能であれば）
+  - Edge
+
+  ---
+  📊 変更ファイルと推定行数
+
+  | ファイル      | 変更内容                 | 推定行数 |
+  |-----------|----------------------|------|
+  | style.css | color-scheme プロパティ追加 | +30行 |
+
+  合計: 約30行の追加
+
+  ---
+  ⏱️ 推定作業時間
+
+  - CSS修正: 5分
+  - ローカルテスト: 10分
+  - Git commit: 5分
+  - 合計: 20分
+
+  ---
+  🎯 修正の優先度
+
+  優先度: 高
+
+  理由:
+  - ユーザビリティに直接影響（アイコンが見えない）
+  - 修正が簡単（CSS追加のみ）
+  - リスクが低い（既存機能への影響なし）
+
+  ---
+  それでは、この修正計画をCodex MCPにレビューさせます。
+
+● codex - codex (MCP)(prompt: "# カレンダーアイコン表示問題の修正計画レビュー依頼\n\n以下の修正計画をレビューしてください。技術的な問題点、改善提案、潜在的なバグ、ブラウザ互換性の懸念、代替案などを指摘 
+                     してください。\n\n## プロジェクト概要\nYouTube チャンネルの動画情報を取得するWebアプリ。Pure
+                     HTML/CSS/JavaScript（フレームワーク不使用）。\nフェーズ5で日付範囲フィルター機能を実装済み。\n\n---\n\n## 🐛 発見された問題\n\n### **現象**\n- **ライトモード**: 日付入力欄（`<input 
+                     type=\"date\">`）のカレンダーアイコンが背景と同色で見えない\n- **ダークモード**: カレンダーアイコンは正常に表示される\n\n###
+                     **ユーザーのテスト結果**\n```\n・ライトモードにおいて日付入力のカレンダーアイコンが背景と同じ色？で見えない。\n・ダークモードでは問題なく見える。\n```\n\n###
+                     **現在のCSS実装**\n```css\n.date-input {\n  padding: 8px 12px;\n  border: 1px solid var(--border-color-light);\n  border-radius: 4px;\n  background-color: var(--bg-container);\n    
+                     color: var(--text-primary);\n  font-size: 14px;\n  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;\n}\n```\n\n**問題点**:\n- `color`
+                     プロパティはテキストの色を制御するが、ブラウザのネイティブUI（カレンダーアイコン）の色は制御できない\n\n---\n\n## 🎯 提案する修正方針\n\n### **CSS `color-scheme`
+                     プロパティを使用**\n\n`color-scheme` プロパティを使用して、ブラウザのネイティブUIコントロールの色を明示的に制御する。\n\n### **修正内容（style.css への追加）**\n\n```css\n/* =====  
+                     日付入力のカレンダーアイコン表示修正 ===== */\n\n/* \n * color-scheme プロパティを使用してブラウザのネイティブUI（カレンダーアイコン）の色を制御\n * ライトモード: light →
+                     アイコンが暗い色\n * ダークモード: dark → アイコンが明るい色\n */\n\n/* ライトモード専用：カレンダーアイコンを暗くする */\n:root[data-theme=\"light\"] .date-input {\n  color-scheme:
+                      light;\n}\n\n/* ダークモード専用：カレンダーアイコンを明るくする */\n[data-theme=\"dark\"] .date-input {\n  color-scheme: dark;\n}\n\n/* システム設定がライトの場合（手動設定なし） 
+                     */\n@media (prefers-color-scheme: light) {\n  :root:not([data-theme]) .date-input {\n    color-scheme: light;\n  }\n}\n\n/* システム設定がダークの場合（手動設定なし） */\n@media    
+                     (prefers-color-scheme: dark) {\n  :root:not([data-theme]) .date-input {\n    color-scheme: dark;\n  }\n}\n```\n\n---\n\n## 🔍 技術的背景\n\n### **`color-scheme` プロパティ**\n- CSS 
+                     Color Adjustment Module Level 1\n- ブラウザのネイティブUIコントロール（カレンダーアイコン、スクロールバー、フォームコントロールなど）の配色を制御\n- MDN:
+                     https://developer.mozilla.org/en-US/docs/Web/CSS/color-scheme\n\n### **ブラウザサポート**\n- Chrome 81+ ✅\n- Edge 81+ ✅\n- Firefox 96+ ✅\n- Safari 13+ ✅\n- Opera 68+ ✅\n\n###  
+                     **動作**\n```css\n/* ライトモード */\ncolor-scheme: light;\n/* → カレンダーアイコン: 暗い色（黒っぽい）*/\n\n/* ダークモード */\ncolor-scheme: dark;\n/* → カレンダーアイコン:       
+                     明るい色（白っぽい）*/\n```\n\n---\n\n## 📋 既存実装との統合\n\n### **現在のダークモード実装**\n```css\n/* 既存のダークモード切り替え（app.js） */\nfunction setTheme(theme,
+                     saveToStorage = true) {\n  const root = document.documentElement;\n  if (theme === 'dark') {\n    root.setAttribute('data-theme', 'dark');\n  } else {\n
+                     root.setAttribute('data-theme', 'light');\n  }\n}\n```\n\n**統合ポイント**:\n- 既存の `data-theme` 属性を活用\n- `:root[data-theme=\"light\"]` と `[data-theme=\"dark\"]`
+                     セレクタで制御\n- システム設定追従も考慮（`@media (prefers-color-scheme)`）\n\n---\n\n## 🧪 テスト計画\n\n### **確認項目**\n1. ライトモード: カレンダーアイコンが見える（暗い色）\n2.
+                      ダークモード: カレンダーアイコンが見える（明るい色）\n3. システム設定追従: OS設定に応じてアイコン色が変わる\n4. ブラウザ互換性: Chrome, Firefox, Edge で動作確認\n\n---\n\n##       
+                     レビューポイント\n\n以下の観点でレビューしてください：\n\n1. **技術的正確性**: `color-scheme` の使い方は正しいか？\n2. **ブラウザ互換性**:
+                     古いブラウザでの挙動は？フォールバックは必要か？\n3. **既存実装との整合性**: 既存のダークモード実装と矛盾しないか？\n4. **パフォーマンス**: パフォーマンス上の懸念はないか？\n5.     
+                     **副作用**: 他のUI要素（スクロールバー、フォームコントロールなど）への影響は？\n6. **代替案**: より良い解決方法はあるか？\n7. **エッジケース**: 考慮すべきエッジケースはないか？\n8. 
+                     **アクセシビリティ**: アクセシビリティへの影響は？\n9. **保守性**: コードの保守性は高いか？\n10. **その他**:
+                     その他の改善提案や懸念事項\n\n特に、実際に問題になりそうな点や、実装前に修正すべき点を重点的に指摘してください。")
+  ⎿ **Summary**
+    - Root cause: `:root { color-scheme: light dark; }` lets the browser choose dark controls when the OS is dark, even if your app is in “light” theme. That causes a white calendar icon on a light     
+     background.
+    … +78 lines (ctrl+o to expand)
+
+
+● Codex MCPからレビュー結果が返ってきました！根本原因が判明しました。
+
+  ---
+  🔍 Codex MCPレビュー結果
+
+  🐛 根本原因の特定
+
+  問題の本質
+
+  現在のstyle.css（line 4）:
+  :root {
+    color-scheme: light dark;  /* ← これが問題！ */
+  }
+
+  何が起きているか:
+  1. color-scheme: light dark; はブラウザに「どちらのテーマでもOK」と伝える
+  2. OSの設定がダークの場合、ブラウザはダークテーマのコントロール（白いアイコン）を選択する
+  3. ユーザーがアプリで「ライトモード」を選んでも、color-scheme が上書きされていないため、カレンダーアイコンは**OS設定に従ってダーク（白い）**のまま
+  4. 結果：白背景 + 白アイコン = 見えない 😱
+
+  なぜダークモードでは問題がなかったのか？
+
+  style.css（line 56）:
+  [data-theme="dark"] {
+    color-scheme: dark;  /* ← これで上書きされる */
+  }
+
+  ダークモードでは明示的に color-scheme: dark; が設定されているため、正しく動作していた。
+
+  しかし、ライトモードには対応する設定がない！
+
+  ---
+  ✅ Codex推奨の修正方針
+
+  修正1: ルートレベルで color-scheme を制御（推奨）
+
+  /* ライトモード：明示的に light を設定 */
+  [data-theme="light"] {
+    color-scheme: light;
+  }
+
+  /* ダークモード：既存のまま */
+  [data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  /* オプション：デフォルトを明示的に light に変更 */
+  :root {
+    color-scheme: light;  /* 変更前: light dark */
+  }
+
+  メリット:
+  - ✅ すべてのネイティブコントロール（カレンダーアイコン、select、スクロールバーなど）が一貫する
+  - ✅ アプリのテーマとOS設定の不一致を解消
+  - ✅ 将来的に追加するフォームコントロールも自動的に対応
+  - ✅ コードがシンプル
+
+  ---
+  修正2: WebKitフォールバック（オプション）
+
+  古いSafari（13-14）や特殊なケース用:
+
+  /* WebKit系ブラウザ専用：カレンダーアイコンの色を強制調整 */
+  :root[data-theme="light"] .date-input::-webkit-calendar-picker-indicator {
+    filter: none;
+  }
+
+  :root[data-theme="dark"] .date-input::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(1.1);
+  }
+
+  メリット:
+  - 古いSafariでも確実に動作
+
+  デメリット:
+  - WebKit専用（Firefoxでは無視される）
+  - filter は若干のパフォーマンスコスト
+
+  ---
+  📋 最終的な修正計画
+
+  ステップ1: style.css の修正（必須）
+
+  場所1: :root の定義を修正（line 3-4）
+
+  修正前:
+  :root {
+    color-scheme: light dark;
+
+  修正後:
+  :root {
+    color-scheme: light;
+
+  場所2: [data-theme="light"] ルールを追加（line 55付近）
+
+  修正前:
+  /* ダークモード */
+  [data-theme="dark"] {
+    color-scheme: dark;
+    /* ... その他のCSS変数 ... */
+  }
+
+  修正後:
+  /* ライトモード */
+  [data-theme="light"] {
+    color-scheme: light;
+  }
+
+  /* ダークモード */
+  [data-theme="dark"] {
+    color-scheme: dark;
+    /* ... その他のCSS変数 ... */
+  }
+
+  ---
+  ステップ2: WebKitフォールバックの追加（オプション）
+
+  場所: 日付範囲フィルターセクションの末尾（line 552付近）
+
+  /* ===== WebKitフォールバック（古いSafari対策） ===== */
+
+  /* ライトモード：カレンダーアイコンをデフォルト表示 */
+  :root[data-theme="light"] .date-input::-webkit-calendar-picker-indicator {
+    filter: none;
+  }
+
+  /* ダークモード：カレンダーアイコンを反転して明るく */
+  :root[data-theme="dark"] .date-input::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(1.1);
+  }
+
+  ---
+  📊 修正内容のまとめ
+
+  | 修正箇所                 | 変更内容                                             | 行数   | 必須/オプション |
+  |----------------------|--------------------------------------------------|------|----------|
+  | :root                | color-scheme: light dark; → color-scheme: light; | 1行変更 | 必須       |
+  | [data-theme="light"] | color-scheme: light; を追加                         | +3行  | 必須       |
+  | WebKitフォールバック        | ::-webkit-calendar-picker-indicator スタイル追加       | +10行 | オプション    |
+
+  合計: 必須14行、オプション+10行
+
+  ---
+  🧪 テスト計画（更新版）
+
+  確認項目
+
+  1. ライトモード（OS設定がダーク）
+
+  - カレンダーアイコンが見える（暗い色）← これが今回の問題
+  - selectボックスのドロップダウンアイコンも暗い
+  - スクロールバーがライトテーマ
+
+  2. ダークモード（OS設定がライト）
+
+  - カレンダーアイコンが見える（明るい色）
+  - selectボックスのドロップダウンアイコンも明るい
+  - スクロールバーがダークテーマ
+
+  3. システム設定追従
+
+  - data-theme 未設定 + OS設定ライト → すべてライト
+  - data-theme 未設定 + OS設定ダーク → すべてダーク
+
+  4. ブラウザ互換性
+
+  - Chrome（最新版）
+  - Firefox（最新版）
+  - Edge（最新版）
+  - Safari 15+（可能であれば）
+
+  ---
+  ⚠️ Codexからの重要な指摘
+
+  副作用について
+
+  Scrollbars, focus rings, form controls, and autocomplete popups adopt the chosen scheme.
+
+  意味:
+  - スクロールバー、フォーカスリング、フォームコントロール、オートコンプリートポップアップもすべて color-scheme の影響を受ける
+  - これは望ましい動作（一貫性のため）
+
+  確認が必要:
+  - スクロールバーがテーマと一致するか
+  - フォーカス表示が適切か
+
+  ---
+  アクセシビリティについて
+
+  Keep focus visibility (.date-input:focus currently removes outline; prefer :focus-visible with a visible outline for accessibility).
+
+  現在のコード（style.css:503）:
+  .date-input:focus {
+    outline: none;  /* ← これは問題 */
+    border-color: var(--accent-color);
+  }
+
+  推奨される修正:
+  .date-input:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+  }
+
+  理由:
+  - キーボードナビゲーションユーザー（視覚障害者など）がフォーカス位置を視覚的に確認できる
+  - :focus-visible はマウスクリック時には表示されないが、キーボード操作時には表示される
+
+  ---
+  🎯 最終的な修正内容（まとめ）
+
+  必須修正
+
+  1. :root の color-scheme を light に変更
+  2. [data-theme="light"] に color-scheme: light; を追加
+
+  推奨修正
+
+  3. WebKitフォールバックの追加（古いSafari対策）
+  4. .date-input:focus を .date-input:focus-visible に変更（アクセシビリティ）
+
+  ---
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Ready to code?
+
+ Here is Claude's plan:
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+ カレンダーアイコン表示問題の修正計画
+
+ 📋 修正内容
+
+ 必須修正（2箇所）
+
+ 1. :root の color-scheme 修正（line 4）
+   - 変更前: color-scheme: light dark;
+   - 変更後: color-scheme: light;
+ 2. [data-theme="light"] ルール追加（line 55付近）
+   - 追加: [data-theme="light"] { color-scheme: light; }
+
+ 推奨修正（2箇所）
+
+ 3. WebKitフォールバック追加（line 552付近）
+   - 古いSafari対策用のカレンダーアイコン調整
+ 4. アクセシビリティ改善（line 503）
+   - .date-input:focus → .date-input:focus-visible に変更
+
+ 🎯 修正理由
+
+ 根本原因:
+ - :root { color-scheme: light dark; } によりOSの設定に従ってしまう
+ - ライトモード選択時でもOS設定がダークだと白いアイコンが表示される
+ - 結果：白背景 + 白アイコン = 見えない
+
+ 解決策:
+ - アプリのテーマに応じて color-scheme を明示的に制御
+ - すべてのネイティブコントロール（カレンダー、select、スクロールバー）が統一される
+
+ ⏱️ 推定時間
+
+ - 修正: 10分
+ - テスト: 10分
+ - 合計: 20分
+---
+● 承認ありがとうございます！それでは修正を実施します。
+
+● 修正1: :root の color-scheme を変更
+
+● Update(style.css)
+  ⎿  Updated style.css with 1 addition and 1 removal
+       1    /* ===== CSS変数定義 ===== */
+       2    /* ライトモード（デフォルト） */
+       3    :root {
+       4 -    color-scheme: light dark;
+       4 +    color-scheme: light;
+       5
+       6      /* 背景色 */
+       7      --bg-primary: #f5f5f5;
+
+● 修正2: [data-theme="light"] ルールを追加
+
+● Update(style.css)
+  ⎿  Updated style.css with 5 additions
+       52      --export-border: #4caf50;
+       53    }
+       54
+       55 +  /* ライトモード（手動設定時） */
+       56 +  [data-theme="light"] {
+       57 +    color-scheme: light;
+       58 +  }
+       59 +  
+       60    /* ダークモード */
+       61    [data-theme="dark"] {
+       62      color-scheme: dark;
+
+● 修正3: WebKitフォールバックを追加
+
+● Update(style.css)
+  ⎿  Updated style.css with 12 additions
+       555        width: 100%;
+       556      }
+       557    }
+       558 +  
+       559 +  /* ===== WebKitフォールバック（古いSafari対策） ===== */
+       560 +  
+       561 +  /* ライトモード：カレンダーアイコンをデフォルト表示 */
+       562 +  :root[data-theme="light"] .date-input::-webkit-calendar-picker-indicator {
+       563 +    filter: none;
+       564 +  }
+       565 +  
+       566 +  /* ダークモード：カレンダーアイコンを反転して明るく */
+       567 +  :root[data-theme="dark"] .date-input::-webkit-calendar-picker-indicator {
+       568 +    filter: invert(1) brightness(1.1);
+       569 +  }
+
+● 修正4: アクセシビリティ改善（focus-visible）
+
+● Update(style.css)
+  ⎿  Updated style.css with 5 additions
+       510      border-color: var(--accent-color);
+       511    }
+       512
+       513 +  .date-input:focus-visible {
+       514 +    outline: 2px solid var(--accent-color);
+       515 +    outline-offset: 2px;
+       516 +  }
+       517 +  
+       518    /* クリアボタン */
+       519    .clear-dates-btn {
+       520      padding: 8px 16px;
+
+● 完璧です！すべての修正が完了しました。
+
+  ---
+  ✅ 修正完了！
+
+  実施した修正内容
+
+  1. :root の color-scheme を変更 ✅
+
+  /* 変更前 */
+  color-scheme: light dark;
+
+  /* 変更後 */
+  color-scheme: light;
+
+  2. [data-theme="light"] ルールを追加 ✅
+
+  [data-theme="light"] {
+    color-scheme: light;
+  }
+
+  3. WebKitフォールバックを追加 ✅
+
+  :root[data-theme="light"] .date-input::-webkit-calendar-picker-indicator {
+    filter: none;
+  }
+
+  :root[data-theme="dark"] .date-input::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(1.1);
+  }
+
+  4. アクセシビリティ改善（focus-visible） ✅
+
+  .date-input:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+  }
+
+  ---
+  🧪 テスト手順
+
+  ローカルサーバーは既に起動しています：
+  http://127.0.0.1:8000
+
+  確認すべき項目
+
+  1. ライトモード（重要！）
+
+  - カレンダーアイコンが見える（暗い色）← これが修正の主目的
+  - 日付選択が正常に動作
+  - selectボックス（取得件数）のドロップダウンアイコンも暗い
+
+  2. ダークモード
+
+  - カレンダーアイコンが見える（明るい色）
+  - 日付選択が正常に動作
+  - selectボックスのドロップダウンアイコンも明るい
+
+  3. キーボードナビゲーション
+
+  - Tabキーで日付入力欄にフォーカス
+  - フォーカス時にアウトラインが表示される（アクセシビリティ改善）
+
+  4. スクロールバー
+
+  - ライトモード：ライトなスクロールバー
+  - ダークモード：ダークなスクロールバー
+
+  ---
+  📊 変更内容のまとめ
+
+  | 修正箇所                 | 変更内容                                             | 行数   |
+  |----------------------|--------------------------------------------------|------|
+  | :root                | color-scheme: light dark; → color-scheme: light; | 1行変更 |
+  | [data-theme="light"] | color-scheme: light; を追加                         | +3行  |
+  | WebKitフォールバック        | カレンダーアイコン調整                                      | +10行 |
+  | アクセシビリティ             | :focus-visible 追加                                | +5行  |
+
+  合計: 約18行の追加・変更
+
+  ---
+  💬 次のステップ
+
+  ブラウザで http://127.0.0.1:8000 を開いて、以下を確認してください：
+
+  1. ライトモードでカレンダーアイコンが見えるか（最重要）
+  2. ダークモードも正常か
+  3. その他のUI要素に問題がないか
+
+  テスト結果を教えてください！
+  ---
+  > & 'c:\Users\littl\OneDrive\Pictures\Screenshots\スクリーンショット 2025-11-10 120354.png'ダークモードでのカレンダーアイコンが暗く見難いです。それ以外は問題ないです 
+
+● スクリーンショットを確認させてください。
+
+● Read(/mnt/c/Users/littl/OneDrive/Pictures/Screenshots/スクリーンショット 2025-11-10 120354.png)
+  ⎿  Read image (55.1KB)
+
+● スクリーンショットを確認しました！確かにダークモードでカレンダーアイコンが暗くて見にくいですね。
+
+  ---
+  🐛 問題の確認
+
+  現象:
+  - ダークモード（暗い背景）でカレンダーアイコンが暗い色で表示されている
+  - 背景が暗いため、アイコンが見えにくい
+
+  原因:
+  WebKitフォールバックの filter 設定が逆になっている可能性があります。
+
+  ---
+  🔧 修正方針
+
+  filter: invert(1) の効果を調整する必要があります。
+
+  現在のコード:
+
+  :root[data-theme="dark"] .date-input::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(1.1);
+  }
+
+  問題点:
+  - invert(1) で色を反転させているが、元の色によっては暗くなる可能性がある
+  - brightness(1.1) だけでは不十分
+
+  修正案:
+
+  :root[data-theme="dark"] .date-input::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(2);
+  }
+
+  または、より確実に明るくする：
+
+  :root[data-theme="dark"] .date-input::-webkit-calendar-picker-indicator {
+    filter: brightness(0) invert(1);
+  }
+
+  ---
+
+● それでは修正します。brightness の値を大きくして、より明るくします。
+
+● Update(style.css)
+  ⎿  Updated style.css with 1 addition and 1 removal
+       570
+       571    /* ダークモード：カレンダーアイコンを反転して明るく */
+       572    :root[data-theme="dark"] .date-input::-webkit-calendar-picker-indicator {
+       573 -    filter: invert(1) brightness(1.1);
+       573 +    filter: brightness(0) invert(1);
+       574    }
+
+● ---
+  ✅ 修正完了！
+
+  変更内容
+
+  修正前:
+  filter: invert(1) brightness(1.1);
+
+  修正後:
+  filter: brightness(0) invert(1);
+
+  仕組みの説明
+
+  この filter は2段階で処理されます：
+
+  1. brightness(0): アイコンを完全に黒くする
+  2. invert(1): 黒を白に反転する
+
+  結果: 元のアイコンの色に関係なく、常に純白のアイコンが表示されます。
+
+  ---
+  🧪 再テスト
+
+  ブラウザをリロード（Ctrl+F5 または Cmd+Shift+R）して、以下を確認してください：
+
+  ダークモード
+
+  - カレンダーアイコンが**明るく（白く）**見える
+  - 背景が暗いため、アイコンがはっきり見える
+  - クリックして日付選択が正常に動作する
+
+  ライトモード
+
+  - カレンダーアイコンが**暗く（黒く）**見える（前回のテストでOKだったはず）
+  - 背景が明るいため、アイコンがはっきり見える
+
+  ---
+  💬 次のアクション
+
+  再度テストして結果を教えてください！
+
+  もしまだ暗い場合は、さらに調整します（filter: invert(1) brightness(2); など）。
+  ---
   
