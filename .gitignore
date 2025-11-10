@@ -13,3 +13,7 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Cloudflare Workers シークレット（ローカル開発用）
+.dev.vars
+node_modules/

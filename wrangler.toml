@@ -1,0 +1,13 @@
+name = "youtube-list-tool-proxy"
+main = "workers/youtube-proxy.js"
+compatibility_date = "2024-01-01"
+
+# Workers サイト設定
+# note: このWorkerはCORS Proxyとして機能します
+
+[env.production]
+name = "youtube-list-tool-proxy"
+routes = []
+
+[env.development]
+name = "youtube-list-tool-proxy-dev"

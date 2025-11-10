@@ -1,8 +1,26 @@
 // ===== 定数定義 =====
 
+// CORS Proxy 設定
+// 優先順位: 自前Worker > allorigins.win > corsproxy.io
 const PROXY_CONFIG = [
-  { url: 'https://api.allorigins.win/raw?url=', timeout: 10000 },
-  { url: 'https://corsproxy.io/?', timeout: 10000 }
+  {
+    name: 'Custom Worker',
+    url: 'https://youtube-list-tool-proxy.littlelit-3.workers.dev/?url=',
+    timeout: 10000,
+    enabled: true // デプロイ後に true に変更
+  },
+  {
+    name: 'AllOrigins',
+    url: 'https://api.allorigins.win/raw?url=',
+    timeout: 10000,
+    enabled: true
+  },
+  {
+    name: 'CorsProxy',
+    url: 'https://corsproxy.io/?',
+    timeout: 10000,
+    enabled: true
+  }
 ];
 
 const CHANNEL_ID_REGEX = /^UC[\w-]{22}$/;
@@ -10,19 +28,22 @@ const CHANNEL_URL_REGEX = /youtube\.com\/channel\/(UC[\w-]{22})/;
 const CONCURRENCY_LIMIT = 3; // 同時実行数の制限
 const DEFAULT_LIMIT = 15;
 
+// エクスポート用のデータ保持
+let lastFetchedData = null;
+
 // エラーメッセージの定数化
 const ERROR_MESSAGES = {
   EMPTY_LINE: '空行',
-  INVALID_AT: '@username 形式は非対応です。チャンネルID（UC...）を使用してください。',
+  INVALID_AT: '@username 形式は非対応です。チャンネルID（UC...）を使用してください。YouTubeのチャンネルページを開き、URLから「UC...」の部分をコピーしてください。',
   INVALID_C: '/c/ 形式は廃止されました。チャンネルID（UC...）を使用してください。',
   INVALID_FORMAT: '不正な形式です。チャンネルID（UC...）または /channel/UC... を入力してください。',
   INPUT_REQUIRED: 'チャンネルIDまたはURLを入力してください。',
   ALL_FAILED: '全てのチャンネルで取得に失敗しました。入力内容を確認してください。',
-  TIMEOUT: 'タイムアウトしました',
-  PROXY_UNAVAILABLE: '全てのCORS Proxyが利用できません。時間をおいて再試行してください。',
-  INVALID_XML: 'Invalid XML format',
-  CHANNEL_MISMATCH: '要求したチャンネルとRSSの発信元が一致しません',
-  INVALID_URL: '不正な動画URLを検出しました',
+  TIMEOUT: '接続がタイムアウトしました。インターネット接続を確認するか、時間をおいて再試行してください。',
+  PROXY_UNAVAILABLE: 'CORS Proxyサービスが一時的に利用できません。レート制限に達している可能性があります。15分ほど待ってから再試行してください。',
+  INVALID_XML: 'チャンネルが存在しないか、RSSフィードの取得に失敗しました。チャンネルIDが正しいか確認してください。',
+  CHANNEL_MISMATCH: 'セキュリティエラー: 要求したチャンネルとRSSの発信元が一致しません',
+  INVALID_URL: 'セキュリティエラー: 不正な動画URLを検出しました',
   CHANNEL_NAME_UNKNOWN: 'チャンネル名不明',
   TITLE_UNKNOWN: 'タイトル不明'
 };
@@ -31,10 +52,12 @@ const ERROR_MESSAGES = {
 const UI = {
   get fetchButton() { return document.getElementById('fetchButton'); },
   get loading() { return document.getElementById('loading'); },
+  get loadingText() { return document.getElementById('loadingText'); },
   get results() { return document.getElementById('results'); },
   get errors() { return document.getElementById('errors'); },
   get channelInput() { return document.getElementById('channelInput'); },
-  get limitSelect() { return document.getElementById('limitSelect'); }
+  get limitSelect() { return document.getElementById('limitSelect'); },
+  get exportButtons() { return document.getElementById('exportButtons'); }
 };
 
 // ===== UI状態管理ヘルパー =====
@@ -42,10 +65,14 @@ const UI = {
 /**
  * ローディング状態を設定
  * @param {boolean} isLoading - ローディング中かどうか
+ * @param {string} progressText - プログレステキスト（オプション）
  */
-function setLoadingState(isLoading) {
+function setLoadingState(isLoading, progressText = '取得中...') {
   UI.fetchButton.disabled = isLoading;
   UI.loading.toggleAttribute('hidden', !isLoading);
+  if (isLoading && UI.loadingText) {
+    UI.loadingText.textContent = progressText;
+  }
 }
 
 /**
@@ -54,6 +81,9 @@ function setLoadingState(isLoading) {
 function clearOutputs() {
   UI.results.textContent = '';
   UI.errors.textContent = '';
+  if (UI.exportButtons) {
+    UI.exportButtons.style.display = 'none';
+  }
 }
 
 /**
@@ -109,11 +139,61 @@ function truncateTitle(title, maxLength = 30) {
 // ===== 入力正規化 =====
 
 /**
+ * @username をチャンネルIDに解決（Workers経由）
+ * @param {string} username - @username（例: @mkbhd）
+ * @returns {Promise<{ success: boolean, channelId?: string, error?: string }>}
+ */
+async function resolveUsername(username) {
+  try {
+    const cleanUsername = username.replace(/^@/, '');
+    const workerUrl = PROXY_CONFIG.find(proxy => proxy.name === 'Custom Worker' && proxy.enabled);
+
+    if (!workerUrl) {
+      return {
+        success: false,
+        error: '@username の解決には Custom Worker が必要です。設定を確認してください。'
+      };
+    }
+
+    // Workers の /resolve-channel エンドポイントを呼ぶ
+    const apiUrl = workerUrl.url.replace('/?url=', '/resolve-channel') + `?username=${encodeURIComponent(cleanUsername)}`;
+
+    const response = await fetchWithTimeout(apiUrl, 10000);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errorData.error || `@${cleanUsername} のチャンネルが見つかりませんでした。`
+      };
+    }
+
+    const data = await response.json();
+
+    if (!data.channelId) {
+      return {
+        success: false,
+        error: `@${cleanUsername} のチャンネルIDを取得できませんでした。`
+      };
+    }
+
+    return { success: true, channelId: data.channelId };
+
+  } catch (error) {
+    console.error('Username resolution error:', error);
+    return {
+      success: false,
+      error: `@username の解決中にエラーが発生しました: ${error.message}`
+    };
+  }
+}
+
+/**
  * 入力を正規化してチャンネルIDを抽出
  * @param {string} input - ユーザー入力
- * @returns {{ success: boolean, channelId?: string, error?: string }}
+ * @returns {Promise<{ success: boolean, channelId?: string, error?: string }>}
  */
-function normalizeInput(input) {
+async function normalizeInput(input) {
   const trimmed = input.trim();
 
   // 空行チェック
@@ -132,11 +212,12 @@ function normalizeInput(input) {
     return { success: true, channelId: urlMatch[1] };
   }
 
-  // 非対応形式
+  // @username 形式の処理（Workers経由で解決）
   if (trimmed.includes('@')) {
-    return { success: false, error: ERROR_MESSAGES.INVALID_AT };
+    return await resolveUsername(trimmed);
   }
 
+  // 非対応形式
   if (trimmed.includes('/c/')) {
     return { success: false, error: ERROR_MESSAGES.INVALID_C };
   }
@@ -153,11 +234,14 @@ function normalizeInput(input) {
  * @returns {Promise<string>} - レスポンステキスト
  */
 async function fetchWithProxy(targetUrl, proxyIndex = 0) {
-  if (proxyIndex >= PROXY_CONFIG.length) {
+  // 有効なProxyのみをフィルタリング
+  const enabledProxies = PROXY_CONFIG.filter(p => p.enabled);
+
+  if (proxyIndex >= enabledProxies.length) {
     throw new Error(ERROR_MESSAGES.PROXY_UNAVAILABLE);
   }
 
-  const proxy = PROXY_CONFIG[proxyIndex];
+  const proxy = enabledProxies[proxyIndex];
   const encodedUrl = encodeURIComponent(targetUrl);
   const proxiedUrl = proxy.url + encodedUrl;
 
@@ -175,10 +259,11 @@ async function fetchWithProxy(targetUrl, proxyIndex = 0) {
       throw new Error('Proxy returned HTML error page');
     }
 
+    console.log(`✓ ${proxy.name} succeeded`);
     return text;
 
   } catch (error) {
-    console.warn(`Proxy ${proxyIndex + 1} failed:`, error.message);
+    console.warn(`✗ ${proxy.name} (${proxyIndex + 1}/${enabledProxies.length}) failed:`, error.message);
     return fetchWithProxy(targetUrl, proxyIndex + 1);
   }
 }
@@ -378,6 +463,95 @@ function showGlobalError(error) {
   UI.errors.appendChild(createErrorItem({ message: error.message }));
 }
 
+// ===== エクスポート機能 =====
+
+/**
+ * ファイルをダウンロード
+ * @param {string} content - ファイル内容
+ * @param {string} fileName - ファイル名
+ * @param {string} mimeType - MIMEタイプ
+ */
+function downloadFile(content, fileName, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * CSV形式でエクスポート
+ */
+function exportAsCSV() {
+  if (!lastFetchedData || lastFetchedData.length === 0) {
+    alert('エクスポートするデータがありません。');
+    return;
+  }
+
+  // CSVヘッダー
+  const headers = ['Channel', 'Title', 'URL', 'Published Date'];
+
+  // CSVデータ行を生成
+  const rows = lastFetchedData.flatMap(({ channelTitle, videos }) =>
+    videos.map(video => [
+      channelTitle,
+      video.title,
+      video.url,
+      video.published
+    ])
+  );
+
+  // CSV文字列を生成（XSS対策: ダブルクォートをエスケープ）
+  const csvContent = [
+    headers,
+    ...rows
+  ].map(row =>
+    row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+  ).join('\n');
+
+  // ダウンロード実行
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  downloadFile(csvContent, `youtube-videos-${timestamp}.csv`, 'text/csv;charset=utf-8;');
+}
+
+/**
+ * JSON形式でエクスポート
+ */
+function exportAsJSON() {
+  if (!lastFetchedData || lastFetchedData.length === 0) {
+    alert('エクスポートするデータがありません。');
+    return;
+  }
+
+  // JSON データ構造
+  const jsonData = {
+    exportedAt: new Date().toISOString(),
+    totalChannels: lastFetchedData.length,
+    totalVideos: lastFetchedData.reduce((sum, { videos }) => sum + videos.length, 0),
+    channels: lastFetchedData.map(({ channelTitle, videos }) => ({
+      channelTitle,
+      videoCount: videos.length,
+      videos: videos.map(video => ({
+        title: video.title,
+        url: video.url,
+        publishedDate: video.published
+      }))
+    }))
+  };
+
+  // ダウンロード実行
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  downloadFile(
+    JSON.stringify(jsonData, null, 2),
+    `youtube-videos-${timestamp}.json`,
+    'application/json;charset=utf-8;'
+  );
+}
+
 // ===== メインロジック =====
 
 /**
@@ -408,7 +582,7 @@ async function runWithLimit(items, limit, task) {
  * @param {string} rawInput - 生の入力文字列
  * @returns {{ valid: Array, invalid: Array }}
  */
-function parseChannelInput(rawInput) {
+async function parseChannelInput(rawInput) {
   const lines = rawInput
     .split('\n')
     .map(line => line.trim())
@@ -418,10 +592,13 @@ function parseChannelInput(rawInput) {
     throw new Error(ERROR_MESSAGES.INPUT_REQUIRED);
   }
 
-  const normalized = lines.map(line => ({
+  // normalizeInput が非同期なので Promise.all を使用
+  const normalizedPromises = lines.map(async line => ({
     original: line,
-    ...normalizeInput(line)
+    ...await normalizeInput(line)
   }));
+
+  const normalized = await Promise.all(normalizedPromises);
 
   return {
     valid: normalized.filter(n => n.success),
@@ -436,10 +613,18 @@ function parseChannelInput(rawInput) {
  * @returns {Promise<{ results: Array, errors: Array }>}
  */
 async function runChannelFetches(validInputs, limit) {
+  let completedCount = 0;
+  const totalCount = validInputs.length;
+
   const fetchResults = await runWithLimit(validInputs, CONCURRENCY_LIMIT, async (input) => {
     try {
-      return { success: true, data: await fetchChannelVideos(input.channelId, limit) };
+      const result = { success: true, data: await fetchChannelVideos(input.channelId, limit) };
+      completedCount++;
+      setLoadingState(true, `取得中... (${completedCount}/${totalCount} チャンネル処理済み)`);
+      return result;
     } catch (error) {
+      completedCount++;
+      setLoadingState(true, `取得中... (${completedCount}/${totalCount} チャンネル処理済み)`);
       return { success: false, error: error.message, input: input.original };
     }
   });
@@ -464,11 +649,11 @@ async function handleFetch() {
 
   // 状態リセットとローディング表示
   clearOutputs();
-  setLoadingState(true);
+  setLoadingState(true, '取得中...');
 
   try {
-    // 入力をパース
-    const { valid, invalid } = parseChannelInput(channelInput);
+    // 入力をパース（@username の解決を含む）
+    const { valid, invalid } = await parseChannelInput(channelInput);
 
     // チャンネル情報を取得（Promise pool使用）
     const { results, errors } = await runChannelFetches(valid, limit);
@@ -482,6 +667,12 @@ async function handleFetch() {
     // 結果表示
     if (results.length > 0) {
       renderResults(results);
+      // エクスポート用にデータを保存
+      lastFetchedData = results;
+      // エクスポートボタンを表示
+      if (UI.exportButtons) {
+        UI.exportButtons.style.display = 'block';
+      }
     }
 
     // エラー表示
