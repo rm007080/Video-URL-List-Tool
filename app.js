@@ -119,7 +119,10 @@ const UI = {
   get errors() { return document.getElementById('errors'); },
   get channelInput() { return document.getElementById('channelInput'); },
   get limitSelect() { return document.getElementById('limitSelect'); },
-  get exportButtons() { return document.getElementById('exportButtons'); }
+  get exportButtons() { return document.getElementById('exportButtons'); },
+  get startDate() { return document.getElementById('startDate'); },
+  get endDate() { return document.getElementById('endDate'); },
+  get clearDates() { return document.getElementById('clearDates'); }
 };
 
 // ===== UI状態管理ヘルパー =====
@@ -156,6 +159,64 @@ function clearOutputs() {
 function parseLimit(value) {
   const limitValue = parseInt(value, 10);
   return Number.isFinite(limitValue) ? limitValue : DEFAULT_LIMIT;
+}
+
+// ===== 日付処理ユーティリティ =====
+
+/**
+ * ローカル日付文字列をローカル深夜0時のDateオブジェクトに変換
+ * @param {string} yyyyMmDd - 'YYYY-MM-DD' 形式の日付文字列
+ * @returns {Date} - ローカルタイムゾーンの深夜0:00
+ */
+function parseLocalDateOnly(yyyyMmDd) {
+  const [y, m, d] = yyyyMmDd.split('-').map(Number);
+  return new Date(y, m - 1, d); // ローカル深夜0:00
+}
+
+/**
+ * 日付範囲を検証・取得
+ * @returns {{ startDate: Date|null, endDate: Date|null, error: string|null }}
+ */
+function getDateRange() {
+  const startValue = UI.startDate?.value || '';
+  const endValue = UI.endDate?.value || '';
+
+  // 両方空欄の場合はフィルタなし
+  if (!startValue && !endValue) {
+    return { startDate: null, endDate: null, error: null };
+  }
+
+  let startDate = null;
+  let endDate = null;
+
+  // 開始日の処理（ローカル深夜0:00）
+  if (startValue) {
+    startDate = parseLocalDateOnly(startValue);
+    if (Number.isNaN(startDate.getTime())) {
+      return { startDate: null, endDate: null, error: '開始日が不正です。' };
+    }
+  }
+
+  // 終了日の処理（ローカル 23:59:59.999）
+  if (endValue) {
+    const endLocalMidnightNext = parseLocalDateOnly(endValue);
+    endLocalMidnightNext.setDate(endLocalMidnightNext.getDate() + 1);
+    endDate = new Date(endLocalMidnightNext.getTime() - 1); // 23:59:59.999
+    if (Number.isNaN(endDate.getTime())) {
+      return { startDate: null, endDate: null, error: '終了日が不正です。' };
+    }
+  }
+
+  // 開始日 > 終了日 のチェック
+  if (startDate && endDate && startDate > endDate) {
+    return {
+      startDate: null,
+      endDate: null,
+      error: '開始日は終了日より前の日付を指定してください。'
+    };
+  }
+
+  return { startDate, endDate, error: null };
 }
 
 // ===== ユーティリティ関数 =====
@@ -358,12 +419,13 @@ function entryToVideo(entry) {
 }
 
 /**
- * チャンネルの動画情報を取得
+ * チャンネルの動画情報を取得（日付フィルター対応）
  * @param {string} channelId - チャンネルID
- * @param {number} limit - 取得件数
- * @returns {Promise<{ videos: Array, channelTitle: string }>}
+ * @param {number} limit - 取得件数の上限
+ * @param {{ startDate: Date|null, endDate: Date|null }} dateRange - 日付範囲
+ * @returns {Promise<{ videos: Array, channelTitle: string, filteredCount: number }>}
  */
-async function fetchChannelVideos(channelId, limit) {
+async function fetchChannelVideos(channelId, limit, dateRange = {}) {
   const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
 
   try {
@@ -388,9 +450,47 @@ async function fetchChannelVideos(channelId, limit) {
     // チャンネルタイトル取得
     const channelTitle = getNodeText(doc, 'feed > title', ERROR_MESSAGES.CHANNEL_NAME_UNKNOWN);
 
-    // 動画エントリー取得（共通パーサ使用）
+    // 動画エントリー取得
     const entries = Array.from(doc.querySelectorAll('entry'));
-    const videos = entries.slice(0, limit).map(entryToVideo);
+
+    // 日付フィルタリング + 早期停止
+    const videos = [];
+    const startTs = dateRange.startDate?.getTime();
+    const endTs = dateRange.endDate?.getTime();
+    let filteredCount = 0;
+
+    for (const entry of entries) {
+      // 取得上限チェック
+      if (videos.length >= limit) {
+        break;
+      }
+
+      // 先に公開日だけを取得（軽量）
+      const publishedStr = getNodeText(entry, 'published');
+      const ts = Date.parse(publishedStr);
+
+      if (Number.isNaN(ts)) {
+        filteredCount++;
+        continue;
+      }
+
+      // 早期停止: 開始日より古い動画が出たら終了
+      if (startTs != null && ts < startTs) {
+        break;
+      }
+
+      // 範囲チェック
+      const inRange = (
+        (startTs == null || ts >= startTs) &&
+        (endTs == null || ts <= endTs)
+      );
+
+      if (inRange) {
+        videos.push(entryToVideo(entry)); // 範囲内のみ変換
+      } else {
+        filteredCount++;
+      }
+    }
 
     // URL検証（セキュリティ: 不正なURL検出）
     const urlsAreYoutube = videos.every(v => v.url.startsWith('https://www.youtube.com/watch?v='));
@@ -398,7 +498,7 @@ async function fetchChannelVideos(channelId, limit) {
       throw new Error(ERROR_MESSAGES.INVALID_URL);
     }
 
-    return { videos, channelTitle };
+    return { videos, channelTitle, filteredCount };
 
   } catch (error) {
     throw new Error(`取得失敗: ${error.message}`);
@@ -672,15 +772,16 @@ async function parseChannelInput(rawInput) {
  * 複数チャンネルから動画情報を取得（Promise pool使用）
  * @param {Array} validInputs - 有効な入力の配列
  * @param {number} limit - 取得件数
+ * @param {{ startDate: Date|null, endDate: Date|null }} dateRange - 日付範囲
  * @returns {Promise<{ results: Array, errors: Array }>}
  */
-async function runChannelFetches(validInputs, limit) {
+async function runChannelFetches(validInputs, limit, dateRange) {
   let completedCount = 0;
   const totalCount = validInputs.length;
 
   const fetchResults = await runWithLimit(validInputs, CONCURRENCY_LIMIT, async (input) => {
     try {
-      const result = { success: true, data: await fetchChannelVideos(input.channelId, limit) };
+      const result = { success: true, data: await fetchChannelVideos(input.channelId, limit, dateRange) };
       completedCount++;
       setLoadingState(true, `取得中... (${completedCount}/${totalCount} チャンネル処理済み)`);
       return result;
@@ -709,6 +810,15 @@ async function handleFetch() {
   const channelInput = UI.channelInput.value;
   const limit = parseLimit(UI.limitSelect.value);
 
+  // 日付範囲の取得・検証
+  const dateRange = getDateRange();
+
+  if (dateRange.error) {
+    clearOutputs();
+    showGlobalError(new Error(dateRange.error));
+    return;
+  }
+
   // 状態リセットとローディング表示
   clearOutputs();
   setLoadingState(true, '取得中...');
@@ -717,8 +827,8 @@ async function handleFetch() {
     // 入力をパース（@username の解決を含む）
     const { valid, invalid } = await parseChannelInput(channelInput);
 
-    // チャンネル情報を取得（Promise pool使用）
-    const { results, errors } = await runChannelFetches(valid, limit);
+    // チャンネル情報を取得（Promise pool使用、日付範囲を渡す）
+    const { results, errors } = await runChannelFetches(valid, limit, dateRange);
 
     // 不正な入力をエラーに追加
     const allErrors = [
@@ -771,4 +881,40 @@ document.getElementById('themeToggle')?.addEventListener('keydown', (e) => {
     e.preventDefault();
     toggleTheme();
   }
+});
+
+// 日付入力の制約設定とイベントリスナー
+document.addEventListener('DOMContentLoaded', () => {
+  // 今日の日付を取得（YYYY-MM-DD形式）
+  const today = new Date().toISOString().split('T')[0];
+
+  // 両方の入力に max=today を設定
+  if (UI.startDate) UI.startDate.max = today;
+  if (UI.endDate) UI.endDate.max = today;
+
+  // 開始日が変更されたら、終了日の min を更新
+  UI.startDate?.addEventListener('change', () => {
+    if (UI.endDate && UI.startDate.value) {
+      UI.endDate.min = UI.startDate.value;
+    }
+  });
+
+  // 終了日が変更されたら、開始日の max を更新
+  UI.endDate?.addEventListener('change', () => {
+    if (UI.startDate && UI.endDate.value) {
+      UI.startDate.max = UI.endDate.value;
+    }
+  });
+
+  // クリアボタン
+  UI.clearDates?.addEventListener('click', () => {
+    if (UI.startDate) {
+      UI.startDate.value = '';
+      UI.startDate.max = today; // リセット
+    }
+    if (UI.endDate) {
+      UI.endDate.value = '';
+      UI.endDate.min = ''; // リセット
+    }
+  });
 });
