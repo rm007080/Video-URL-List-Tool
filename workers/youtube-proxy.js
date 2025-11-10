@@ -116,7 +116,7 @@ export default {
       // レスポンスの検証
       if (!response.ok) {
         return createErrorResponse(
-          \`YouTube RSS fetch failed: \${response.status} \${response.statusText}\`,
+          `YouTube RSS fetch failed: ${response.status} ${response.statusText}`,
           response.status,
           request
         );
@@ -141,7 +141,7 @@ export default {
           'Access-Control-Allow-Headers': 'Content-Type',
           'Vary': 'Origin',
           'X-Content-Type-Options': 'nosniff',
-          'Cache-Control': \`public, max-age=\${CACHE_TTL_SECONDS}\`, // 5分間キャッシュ
+          'Cache-Control': `public, max-age=${CACHE_TTL_SECONDS}`, // 5分間キャッシュ
           'X-Proxy-By': 'YouTube-List-Tool-Worker',
         },
       });
@@ -149,7 +149,7 @@ export default {
     } catch (error) {
       console.error('Worker error:', error);
       return createErrorResponse(
-        \`Proxy error: \${error && error.message ? error.message : String(error)}\`,
+        `Proxy error: ${error && error.message ? error.message : String(error)}`,
         500,
         request
       );
@@ -267,7 +267,7 @@ async function handleFetchVideos(request, env) {
   }
 
   // レート制限（Durable Object）
-  const clientKey = \`fetch-videos:\${getClientKey(request)}\`;
+  const clientKey = `fetch-videos:${getClientKey(request)}`;
   const rateLimit = await checkRateLimit(env, clientKey, 60, 60_000); // 60req/分
   if (rateLimit.limited) {
     return jsonError(
@@ -362,7 +362,7 @@ async function handleFetchVideos(request, env) {
       if (endDate && published > endDate) continue;
 
       pageVideos.push({
-        url: \`https://www.youtube.com/watch?v=\${sn.resourceId.videoId}\`,
+        url: `https://www.youtube.com/watch?v=${sn.resourceId.videoId}`,
         title,
         published: published.toISOString(),
       });
@@ -417,7 +417,7 @@ async function handleFetchVideos(request, env) {
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Vary': 'Origin',
-    'Cache-Control': \`public, max-age=\${CACHE_TTL_SECONDS}\`,
+    'Cache-Control': `public, max-age=${CACHE_TTL_SECONDS}`,
     'X-Cache': 'MISS',
   };
   const response = new Response(jsonText, { status: 200, headers });
@@ -429,7 +429,7 @@ async function handleFetchVideos(request, env) {
         status: 200,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
-          'Cache-Control': \`public, max-age=\${CACHE_TTL_SECONDS}\`,
+          'Cache-Control': `public, max-age=${CACHE_TTL_SECONDS}`,
         },
       })
     );
@@ -524,7 +524,7 @@ async function handleResolveChannel(request, env) {
   }
 
   // レート制限（Durable Object）
-  const clientKey = \`resolve-channel:\${getClientKey(request)}\`;
+  const clientKey = `resolve-channel:${getClientKey(request)}`;
   const rateLimit = await checkRateLimit(env, clientKey, 120, 60_000); // 120req/分
   if (rateLimit.limited) {
     return jsonError(
@@ -543,7 +543,7 @@ async function handleResolveChannel(request, env) {
   const endpoint = '/channels';
   const params = new URLSearchParams();
   params.set('part', 'id');
-  params.set('forHandle', handle.startsWith('@') ? handle : \`@\${handle}\`);
+  params.set('forHandle', handle.startsWith('@') ? handle : `@${handle}`);
   params.set('fields', 'items(id)');
   params.set('prettyPrint', 'false');
   params.set('key', apiKey);
@@ -584,7 +584,7 @@ async function handleResolveChannel(request, env) {
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Vary': 'Origin',
-      'Cache-Control': \`public, max-age=\${CACHE_TTL_SECONDS}\`,
+      'Cache-Control': `public, max-age=${CACHE_TTL_SECONDS}`,
       'X-Cache': 'MISS',
     },
   });
@@ -596,7 +596,7 @@ async function handleResolveChannel(request, env) {
         status: 200,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
-          'Cache-Control': \`public, max-age=\${CACHE_TTL_SECONDS}\`,
+          'Cache-Control': `public, max-age=${CACHE_TTL_SECONDS}`,
         },
       })
     );
@@ -693,7 +693,7 @@ function jsonOk(payload, allowedOrigin = '') {
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Vary': 'Origin',
-      'Cache-Control': \`public, max-age=\${CACHE_TTL_SECONDS}\`,
+      'Cache-Control': `public, max-age=${CACHE_TTL_SECONDS}`,
     },
   });
 }
@@ -734,7 +734,7 @@ async function fetchWithTimeout(input, timeoutMs = DEFAULT_TIMEOUT_MS, useCache 
     const res = await fetch(req, { signal: controller.signal });
     if (res.ok) {
       const headers = new Headers(res.headers);
-      headers.set('Cache-Control', \`public, max-age=\${cacheTtlSec}\`);
+      headers.set('Cache-Control', `public, max-age=${cacheTtlSec}`);
       const cacheable = new Response(res.body, {
         status: res.status,
         headers,
@@ -817,7 +817,7 @@ async function youtubeApiFetchJson(endpoint, params, { timeoutMs, maxRetries, re
       const text = await res.text();
       const errInfo = parseYouTubeApiError(text) || {};
       const reason = errInfo.reason || '';
-      const message = errInfo.message || \`YouTube API error: \${res.status}\`;
+      const message = errInfo.message || `YouTube API error: ${res.status}`;
 
       // 再試行条件
       if (res.status === 429) {
@@ -925,7 +925,7 @@ async function checkRateLimit(env, key, limit, windowMs) {
     }
     const id = env.RATE_LIMITER.idFromName(key);
     const stub = env.RATE_LIMITER.get(id);
-    const resp = await stub.fetch(\`http://limit/?key=\${encodeURIComponent(key)}&limit=\${limit}&windowMs=\${windowMs}\`);
+    const resp = await stub.fetch(`http://limit/?key=${encodeURIComponent(key)}&limit=${limit}&windowMs=${windowMs}`);
     const data = await resp.json();
     return {
       limited: !!data.limited,
@@ -1004,7 +1004,7 @@ function clamp(n, min, max) {
  */
 function parseISODateStart(s) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
-  const d = new Date(\`\${s}T00:00:00.000Z\`);
+  const d = new Date(`${s}T00:00:00.000Z`);
   if (isNaN(d.getTime())) return null;
   return d;
 }
@@ -1014,7 +1014,7 @@ function parseISODateStart(s) {
  */
 function parseISODateEnd(s) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
-  const d = new Date(\`\${s}T23:59:59.999Z\`);
+  const d = new Date(`${s}T23:59:59.999Z`);
   if (isNaN(d.getTime())) return null;
   return d;
 }
@@ -1030,14 +1030,14 @@ function extractHandle(raw) {
     // /@handle or /handle
     const m = u.pathname.match(/\/@?([^/]+)/);
     if (m && m[1]) {
-      return m[0].startsWith('/@') ? \`@\${m[1]}\` : \`@\${m[1]}\`;
+      return m[0].startsWith('/@') ? `@${m[1]}` : `@${m[1]}`;
     }
   } catch {
     // ignore
   }
   // @付き or プレーン文字列
   if (s.startsWith('@')) return s;
-  if (/^[A-Za-z0-9._-]+$/.test(s)) return \`@\${s}\`;
+  if (/^[A-Za-z0-9._-]+$/.test(s)) return `@${s}`;
   return '';
 }
 
@@ -1070,7 +1070,7 @@ function getClientKey(request) {
              request.headers.get('X-Forwarded-For') ||
              'unknown';
   const origin = request.headers.get('Origin') || '';
-  return \`\${ip}:\${origin}\`;
+  return `${ip}:${origin}`;
 }
 
 /**
@@ -1105,7 +1105,7 @@ export class RateLimiter {
       const windowMs = clamp(Number.parseInt(url.searchParams.get('windowMs') || '60000', 10), 100, 86_400_000);
 
       const now = Date.now();
-      const storageKey = \`rl:\${key}\`;
+      const storageKey = `rl:${key}`;
       let data = await this.state.storage.get(storageKey);
 
       if (!data || typeof data !== 'object') {
