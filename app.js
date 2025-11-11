@@ -67,7 +67,7 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
 const PROXY_CONFIG = [
   {
     name: 'Custom Worker',
-    url: 'http://localhost:8787/?url=',
+    url: 'https://youtube-list-tool-proxy.littlelit-3.workers.dev/?url=',
     timeout: 10000,
     enabled: true
   },
