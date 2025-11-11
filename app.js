@@ -112,11 +112,6 @@ const ERROR_MESSAGES = {
   API_RATE_LIMIT: 'APIのレート制限に達しました。数分後に再試行してください。',
   API_INVALID_KEY: 'サーバー設定エラーが発生しました。管理者に連絡してください。',
   API_CHANNEL_NOT_FOUND: 'チャンネルが見つかりませんでした。チャンネルIDが正しいか確認してください。'
-  TITLE_UNKNOWN: 'タイトル不明',
-  API_QUOTA_EXCEEDED: '1日の無料枠（10,000クォータ）を超過しました。\n・明日（太平洋時間の深夜0時）にリセットされます\n・または件数を減らして再試行してください',
-  API_RATE_LIMIT: 'APIのレート制限に達しました。数分後に再試行してください。',
-  API_INVALID_KEY: 'サーバー設定エラーが発生しました。管理者に連絡してください。',
-  API_CHANNEL_NOT_FOUND: 'チャンネルが見つかりませんでした。チャンネルIDが正しいか確認してください。'
 };
 
 // UI要素のキャッシュ（DOMへの参照を一元管理）
@@ -149,26 +144,7 @@ let loadingState = {
   currentChannels: [],
   allVideos: [],
   nextPageTokens: {},
-  hasMore: false,
-  get clearDates() { return document.getElementById('clearDates'); },
-
-  // 段階的ロード/キャンセル用UI
-  get progressContainer() { return document.getElementById('progressContainer'); },
-  get progressBar() { return document.getElementById('progressBar'); },
-  get progressText() { return document.getElementById('progressText'); },
-  get cancelButton() { return document.getElementById('cancelButton'); },
-  get loadMoreButton() { return document.getElementById('loadMoreButton'); }
-};
-
-// 段階的ロード用の状態管理
-let loadingState = {
-  isLoading: false,
-  isCancelled: false,
-  abortController: null,
-  currentChannels: [],
-  allVideos: [],
-  nextPageTokens: {},
-  hasMore: false,
+  hasMore: false
 };
 
 // ===== UI状態管理ヘルパー =====
@@ -741,98 +717,6 @@ function hideProgress() {
   if (UI.progressText) UI.progressText.textContent = '';
   loadingState.isLoading = false;
 }
-
-/**
- * キャンセルボタン・ハンドラー
- */
-function handleCancel() {
-  loadingState.isCancelled = true;
-  if (UI.cancelButton) UI.cancelButton.disabled = true;
-  if (UI.progressText) UI.progressText.textContent = 'キャンセル中...';
-  try {
-    loadingState.abortController?.abort();
-  } catch (_) {
-    // ignore
-  }
-}
-
-/**
- * さらに読み込むボタンの表示/残り数更新
- */
-function updateLoadMoreButton() {
-  const remaining = Object.values(loadingState.nextPageTokens || {}).filter(Boolean).length;
-  loadingState.hasMore = remaining > 0;
-  if (!UI.loadMoreButton) return;
-  if (remaining > 0) {
-    UI.loadMoreButton.style.display = '';
-    UI.loadMoreButton.textContent = `さらに読み込む（残り ${remaining} チャンネル）`;
-    UI.loadMoreButton.disabled = false;
-  } else {
-    UI.loadMoreButton.style.display = 'none';
-  }
-}
-
-/**
- * nextPageToken を使って全チャンネルの追加読み込み
- */
-async function loadMoreVideos() {
-  if (!loadingState.hasMore || loadingState.isLoading) return;
-  const remainingChannelIds = Object.keys(loadingState.nextPageTokens).filter(cid => !!loadingState.nextPageTokens[cid]);
-  if (remainingChannelIds.length === 0) {
-    updateLoadMoreButton();
-    return;
-  }
-
-  const limit = parseLimit(UI.limitSelect?.value || `${DEFAULT_LIMIT}`);
-  const dateRange = getDateRange();
-
-  loadingState.isCancelled = false;
-  let completed = 0;
-  const total = remainingChannelIds.length;
-
-  try {
-    for (const channelId of remainingChannelIds) {
-      if (loadingState.isCancelled) break;
-      const pageToken = loadingState.nextPageTokens[channelId];
-
-      // APIフェッチ
-      const chunk = await fetchChannelVideosAPI(channelId, limit, dateRange, pageToken);
-
-      // 状態更新: 動画の追記
-      let channelData = loadingState.allVideos.find(c => c.channelId === channelId);
-      if (!channelData) {
-        // 念のため存在しないケースもケア
-        channelData = { channelId, channelTitle: chunk.channelTitle, videos: [] };
-        loadingState.allVideos.push(channelData);
-      }
-      const existingUrls = new Set(channelData.videos.map(v => v.url));
-      const newOnes = chunk.videos.filter(v => !existingUrls.has(v.url));
-      channelData.videos.push(...newOnes);
-      channelData.channelTitle = chunk.channelTitle || channelData.channelTitle;
-
-      // nextPageToken 更新
-      loadingState.nextPageTokens[channelId] = chunk.nextPageToken || null;
-
-      // 画面更新（該当チャンネルのみ）
-      renderResults([{ channelId, channelTitle: channelData.channelTitle, videos: channelData.videos }], channelId);
-
-      // 進捗表示
-      completed += 1;
-      showProgressWithCancel(completed, total, channelData.channelTitle);
-
-      if (loadingState.isCancelled) break;
-    }
-  } catch (e) {
-    showGlobalError(e);
-  } finally {
-    hideProgress();
-    updateLoadMoreButton();
-
-    // エクスポート用に集約データを保存
-    lastFetchedData = loadingState.allVideos.map(({ channelTitle, videos }) => ({ channelTitle, videos }));
-  }
-}
-
 // ===== RSS 取得・パース =====
 
 /**
@@ -983,23 +867,7 @@ async function fetchChannelVideos(channelId, limit, dateRange = {}) {
  * 結果を表示（channelId 指定時は当該セクションのみ更新）
  * @param {Array<{channelId?: string, channelTitle: string, videos: Array}>} resultsData
  * @param {string|null} channelId - 更新対象チャンネルID（省略時は全再描画）
- * 結果を表示（channelId 指定時は当該セクションのみ更新）
- * @param {Array<{channelId?: string, channelTitle: string, videos: Array}>} resultsData
- * @param {string|null} channelId - 更新対象チャンネルID（省略時は全再描画）
  */
-function renderResults(resultsData, channelId = null) {
-  // 全体再描画時のみクリア
-  if (!channelId) {
-    UI.results.textContent = '';
-  }
-
-  // セクション構築・更新ヘルパー
-  const upsertSection = (data) => {
-    const cid = data.channelId || '';
-    const selector = cid ? `.channel-section[data-channel-id="${cid}"]` : null;
-    const existing = selector ? UI.results.querySelector(selector) : null;
-
-    // セクション要素（新規または置換用）
 function renderResults(resultsData, channelId = null) {
   // 全体再描画時のみクリア
   if (!channelId) {
@@ -1016,17 +884,14 @@ function renderResults(resultsData, channelId = null) {
     const section = document.createElement('div');
     section.className = 'channel-section';
     if (cid) section.setAttribute('data-channel-id', cid);
-    if (cid) section.setAttribute('data-channel-id', cid);
 
     // ヘッダー
     const header = document.createElement('div');
     header.className = 'channel-header';
     header.textContent = truncateTitle(data.channelTitle);
-    header.textContent = truncateTitle(data.channelTitle);
     section.appendChild(header);
 
     // 配列を1回だけ走査して3つの文字列を生成（パフォーマンス改善）
-    const aggregated = data.videos.reduce((acc, video) => {
     const aggregated = data.videos.reduce((acc, video) => {
       acc.urls.push(video.url);
       acc.titles.push(video.title);
@@ -1046,26 +911,6 @@ function renderResults(resultsData, channelId = null) {
     const datesBlock = createOutputBlock('Published Dates', aggregated.dates.join('\n'));
     section.appendChild(datesBlock);
 
-    if (existing) {
-      existing.replaceWith(section);
-    } else {
-      UI.results.appendChild(section);
-    }
-  };
-
-  if (channelId) {
-    // 単一セクション更新
-    const item = resultsData.find(r => r.channelId === channelId) || (() => {
-      // フォールバック: 内部状態から再構築
-      const stateItem = loadingState.allVideos.find(c => c.channelId === channelId);
-      if (!stateItem) return null;
-      return { channelId, channelTitle: stateItem.channelTitle, videos: stateItem.videos };
-    })();
-    if (item) upsertSection(item);
-  } else {
-    // 全再描画
-    resultsData.forEach(upsertSection);
-  }
     if (existing) {
       existing.replaceWith(section);
     } else {
@@ -1371,35 +1216,7 @@ async function runChannelFetches(validInputs, limit, dateRange) {
         videos: data.videos.slice()
       });
 
-    if (loadingState.isCancelled) {
-      return { success: false, error: '操作はキャンセルされました。', input: input.original };
-    }
-    try {
-      const data = await fetchChannelVideos(input.channelId, limit, dateRange);
-
-      // nextPageToken を保存
-      if (data.nextPageToken) {
-        loadingState.nextPageTokens[input.channelId] = data.nextPageToken;
-        loadingState.hasMore = true;
-      } else {
-        loadingState.nextPageTokens[input.channelId] = null;
-      }
-
-      // allVideos に保存（channelId含む）
-      loadingState.allVideos.push({
-        channelId: input.channelId,
-        channelTitle: data.channelTitle,
-        videos: data.videos.slice()
-      });
-
       completedCount++;
-      if (limit > 15) {
-        showProgressWithCancel(completedCount, totalCount, data.channelTitle);
-      } else {
-        setLoadingState(true, `取得中... (${completedCount}/${totalCount} チャンネル処理済み)`);
-      }
-
-      return { success: true, data: { channelId: input.channelId, channelTitle: data.channelTitle, videos: data.videos } };
       if (limit > 15) {
         showProgressWithCancel(completedCount, totalCount, data.channelTitle);
       } else {
@@ -1409,11 +1226,6 @@ async function runChannelFetches(validInputs, limit, dateRange) {
       return { success: true, data: { channelId: input.channelId, channelTitle: data.channelTitle, videos: data.videos } };
     } catch (error) {
       completedCount++;
-      if (limit > 15) {
-        showProgressWithCancel(completedCount, totalCount, '');
-      } else {
-        setLoadingState(true, `取得中... (${completedCount}/${totalCount} チャンネル処理済み)`);
-      }
       if (limit > 15) {
         showProgressWithCancel(completedCount, totalCount, '');
       } else {
@@ -1470,12 +1282,6 @@ async function handleFetch() {
     // 結果表示
     if (results.length > 0) {
       renderResults(results);
-      // エクスポート用にデータを保存（段階的ロードでは内部状態から集約）
-      if (limit > 15) {
-        lastFetchedData = loadingState.allVideos.map(({ channelTitle, videos }) => ({ channelTitle, videos }));
-      } else {
-        lastFetchedData = results.map(({ channelTitle, videos }) => ({ channelTitle, videos }));
-      }
       // エクスポート用にデータを保存（段階的ロードでは内部状態から集約）
       if (limit > 15) {
         lastFetchedData = loadingState.allVideos.map(({ channelTitle, videos }) => ({ channelTitle, videos }));
@@ -1563,12 +1369,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
-
-// キャンセルボタン
-document.getElementById('cancelButton')?.addEventListener('click', handleCancel);
-
-// さらに読み込むボタン
-document.getElementById('loadMoreButton')?.addEventListener('click', loadMoreVideos);
 
 // キャンセルボタン
 document.getElementById('cancelButton')?.addEventListener('click', handleCancel);
