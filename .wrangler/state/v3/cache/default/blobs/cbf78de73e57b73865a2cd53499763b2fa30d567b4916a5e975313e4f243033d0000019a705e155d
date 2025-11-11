@@ -1,0 +1,1178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+ <link rel="self" href="http://www.youtube.com/feeds/videos.xml?channel_id=UCVAkt5l6kD4igMdVoEGTGIg"/>
+ <id>yt:channel:VAkt5l6kD4igMdVoEGTGIg</id>
+ <yt:channelId>VAkt5l6kD4igMdVoEGTGIg</yt:channelId>
+ <title>AI整体師</title>
+ <link rel="alternate" href="https://www.youtube.com/channel/UCVAkt5l6kD4igMdVoEGTGIg"/>
+ <author>
+  <name>AI整体師</name>
+  <uri>https://www.youtube.com/channel/UCVAkt5l6kD4igMdVoEGTGIg</uri>
+ </author>
+ <published>2012-03-20T03:34:47+00:00</published>
+ <entry>
+  <id>yt:video:UrcIPSBz2Ec</id>
+  <yt:videoId>UrcIPSBz2Ec</yt:videoId>
+  <yt:channelId>UCVAkt5l6kD4igMdVoEGTGIg</yt:channelId>
+  <title>【AIニュース #205】Grok 4 Fastが200万コンテキストウィンドウに拡張！？ChatGPTの企業顧客が100万社を突破！DeepLが同時通訳ソフトを近く公開か！？</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=UrcIPSBz2Ec"/>
+  <author>
+   <name>AI整体師</name>
+   <uri>https://www.youtube.com/channel/UCVAkt5l6kD4igMdVoEGTGIg</uri>
+  </author>
+  <published>2025-11-10T00:36:56+00:00</published>
+  <updated>2025-11-10T07:14:58+00:00</updated>
+  <media:group>
+   <media:title>【AIニュース #205】Grok 4 Fastが200万コンテキストウィンドウに拡張！？ChatGPTの企業顧客が100万社を突破！DeepLが同時通訳ソフトを近く公開か！？</media:title>
+   <media:content url="https://www.youtube.com/v/UrcIPSBz2Ec?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/UrcIPSBz2Ec/hqdefault.jpg" width="480" height="360"/>
+   <media:description>【僕が気になったAIニューストピック8個】
+①Grok 4 Fast が今、巨大な 2M トークンのコンテキストウィンドウを備えました！
+https://x.com/BrianRoemmele/status/1987222897174380719?s=20
+②新しいGrokアップグレード：
+https://x.com/BrianRoemmele/status/1986949680278937736?s=20
+③Googleドキュメント内の Gemini は、Doc にリンクされたソースに基づいた回答とライティング提案を提供します。
+https://x.com/GoogleWorkspace/status/1986555581256106189?s=20
+④LLMの回答に引用されやすいページの特徴を分析しました。
+https://x.com/AhrefsJP/status/1986662152208294319?s=20
+⑤ChatGPTの企業顧客が100万社を突破
+https://x.com/ytiskw/status/1987176879875665955?s=20
+⑥GoogleがAnthropicへの追加投資を協議中
+https://x.com/MLBear2/status/1986956435662774551?s=20
+⑦Googleは新しいAIモデル「HOPE」で継続的な学習に向けた大きな一歩を踏み出したと宣伝
+https://indianexpress.com/article/technology/artificial-intelligence/google-big-step-continual-learning-new-ai-model-10355454/?utm_source=chatgpt.com
+⑧同時通訳ソフト、近く公開　ＡＩで「人類の夢」実現へ―独ＤｅｅｐＬ
+https://x.com/jijicom/status/1987461665772966382?s=20
+
+◆コメント紹介
+Ｘで流れているリポジトリ情報のブックマークとして大変便利だと思いますし、そういった形で使って行きたいです。
+そのためにも自分独自のタグ付けや色づけが出来ると良いと感じました。
+例えば右クリックでサブメニューがでて、設定出来るイメージです。タグでの検索もあると嬉しいです。
+
+A：
+フィードバックありがとうございます！！
+「追加したリポジトリのタグ付け機能」ですね！ 
+確かにあると便利そうですね！実装計画立ててみます！！
+
+
+◆動画タイムライン
+0:00 オープニング
+0:25 Grok 4 Fast が200万トークンのコンテキストウィンドウを搭載
+1:47 新しいGrokのアップグレード
+2:58 Googleドキュメント内のGeminiのアップデート
+4:08 LLMに引用されやすいページの特徴
+5:36 ChatGPTの企業顧客が100万社を突破
+6:58 GoogleがAnthropicへの追加投資を協議中
+7:57 Googleの新しいAIモデル「HOPE」
+9:07 DeepLが同時通訳ソフトを近く公開
+10:35 コメント紹介
+13:01 エンディング
+
+
+
+
+GitHubリポジトリ管理を楽にするWEBアプリ
+『DevBoard（デブボード）』👇
+https://devboard.app
+
+個人開発したブックマークアプリ
+『ClipTuck〜自分だけの本棚〜』※体験版👇
+https://ryukou-okumura.github.io/ClipTuck-trial/
+
+使い方note記事👇
+https://note.com/redcord/n/n394272c3c8e4
+
+開発秘話note記事👇
+https://note.com/redcord/n/n052e13c2df38
+
+フル版はnoteメンバーシップ限定でご利用いただけます👇
+https://note.com/redcord/membership/join?preview=true
+
+
+◆noteでもAIニュースやTipsをまとめています！
+https://note.com/redcord
+
+◆noteメンバーシップでは、ぶっちゃけ日記を書いてます！
+https://note.com/redcord/membership
+
+◆Xアカウントはこちら！
+https://x.com/redcord_okumura
+
+◆Genspark公式アンバサダーやってます！
+　こちらから登録してもらうと1,000クレジット多くもらえます！
+https://genspark.ai?via=okumura
+
+◆生成AIのセミナーやAI顧問の依頼はこちらから！
+https://forms.gle/YsLjCRwF8RUasGLy8
+
+◆僕の整体院のHPはこちら！
+https://physical-balance-lab.com
+
+◆整体院の公式Instagram！
+https://www.instagram.com/pbl.okumura</media:description>
+   <media:community>
+    <media:starRating count="31" average="5.00" min="1" max="5"/>
+    <media:statistics views="1349"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:zd_xh6rCfS4</id>
+  <yt:videoId>zd_xh6rCfS4</yt:videoId>
+  <yt:channelId>UCVAkt5l6kD4igMdVoEGTGIg</yt:channelId>
+  <title>【GPTラジオ #31】個人開発のアイデア出しってどうやってる？作りたいものってなかなか思い浮かばないよね。</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=zd_xh6rCfS4"/>
+  <author>
+   <name>AI整体師</name>
+   <uri>https://www.youtube.com/channel/UCVAkt5l6kD4igMdVoEGTGIg</uri>
+  </author>
+  <published>2025-11-09T01:01:17+00:00</published>
+  <updated>2025-11-09T08:10:22+00:00</updated>
+  <media:group>
+   <media:title>【GPTラジオ #31】個人開発のアイデア出しってどうやってる？作りたいものってなかなか思い浮かばないよね。</media:title>
+   <media:content url="https://www.youtube.com/v/zd_xh6rCfS4?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/zd_xh6rCfS4/hqdefault.jpg" width="480" height="360"/>
+   <media:description>普段から結構、こんな会話してます。
+
+◆楽曲
+曲名：『朝のひかり』
+作詞：ChatGPT＆AI整体師
+作曲：Suno.AI v5</media:description>
+   <media:community>
+    <media:starRating count="8" average="5.00" min="1" max="5"/>
+    <media:statistics views="243"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:F9uiLUj2llE</id>
+  <yt:videoId>F9uiLUj2llE</yt:videoId>
+  <yt:channelId>UCVAkt5l6kD4igMdVoEGTGIg</yt:channelId>
+  <title>【ライブ配信#48】Codex-mini出たし、CursorのComposer 1無料だし、色々試しながらみんなで色々雑談を楽しむ！</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=F9uiLUj2llE"/>
+  <author>
+   <name>AI整体師</name>
+   <uri>https://www.youtube.com/channel/UCVAkt5l6kD4igMdVoEGTGIg</uri>
+  </author>
+  <published>2025-11-08T13:15:05+00:00</published>
+  <updated>2025-11-08T13:55:30+00:00</updated>
+  <media:group>
+   <media:title>【ライブ配信#48】Codex-mini出たし、CursorのComposer 1無料だし、色々試しながらみんなで色々雑談を楽しむ！</media:title>
+   <media:content url="https://www.youtube.com/v/F9uiLUj2llE?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/F9uiLUj2llE/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="11" average="5.00" min="1" max="5"/>
+    <media:statistics views="448"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:kligJg_o9Ls</id>
+  <yt:videoId>kligJg_o9Ls</yt:videoId>
+  <yt:channelId>UCVAkt5l6kD4igMdVoEGTGIg</yt:channelId>
+  <title>【AIニュース #204】GPT-5-Codex-miniが登場！通常Codexより4倍多く使える！？GPT 5.1のリリース日は11月24日に決定！？脳の活動を「文」に変換するAIを開発！？</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=kligJg_o9Ls"/>
+  <author>
+   <name>AI整体師</name>
+   <uri>https://www.youtube.com/channel/UCVAkt5l6kD4igMdVoEGTGIg</uri>
+  </author>
+  <published>2025-11-08T00:45:44+00:00</published>
+  <updated>2025-11-08T07:29:34+00:00</updated>
+  <media:group>
+   <media:title>【AIニュース #204】GPT-5-Codex-miniが登場！通常Codexより4倍多く使える！？GPT 5.1のリリース日は11月24日に決定！？脳の活動を「文」に変換するAIを開発！？</media:title>
+   <media:content url="https://www.youtube.com/v/kligJg_o9Ls?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/kligJg_o9Ls/hqdefault.jpg" width="480" height="360"/>
+   <media:description>【僕が気になったAIニューストピック6個】
+①GPT-5-Codex-Miniがリリースされ、より多くのCodex利用が可能になりました：
+https://x.com/OpenAIDevs/status/1986861734619947305?s=20
+②GPT-5.1のリリース日は2025年11月24日だ！
+https://x.com/kimmonismus/status/1986896462022910147?s=20
+③Google DriveからPDFやスプレッドシートをNotebookLMのソースとしてアップロードできます。
+https://x.com/testingcatalog/status/1986886037256249431?s=20
+④新機能: Qoder CLI が OpenSpec をサポート
+https://x.com/qoder_ai_ide/status/1986789670580297892?s=20
+⑤JetBrains IDEの皆さん：今週Qoderプラグインを提出しました
+https://x.com/qoder_ai_ide/status/1986812917883482155?s=20
+⑥研究者たちは、脳の活動を「文」に変換するAIを開発しました。
+https://x.com/Suzacque/status/1986617876741263496
+
+◆コメント紹介
+初めまして！ 私も非エンジニアですが、コーディングはclaude一択です。
+ただし制限が厳しくなったので、そこが非常に残念です！ 
+もはやclaude１つでのLLMの運用は不可能ですね… 
+追加でGPTを契約しましたが、検索と知識は素晴らしいですね！
+以前は、sonnet4.5で設計してコーディングはcursor+sonnet4.5環境だったのですが、cursorも改悪が行われしまってから4-5日でproプランの制限が掛ります。 
+なので今は、cline+Haiku4.5 or sonnet4.5（ここ一発！）やwindsurfでどれがいいのか思案中です。 
+今ここで困っているユーザーは非常に多いんじゃないでしょうか？ 
+claude codeは週間制限が怖くてほとんど使えていませんが、$250無料期間内に色々と挑戦してみたいと思います！ 
+ライブ配信など、ぜひ参加してみたいです。 
+今後とも頑張ってください！
+
+A：
+おぉ！コメントありがとうございます！ 非エンジニアで個人開発に挑戦している方からのコメント嬉しいです😆
+確かにエディターや金額を抑えての開発に悩まれてる方は多いですよね💦
+それでもこうして仲間が増えていくのは嬉しいです！
+ぜひライブ配信もお待ちしてます😊
+
+◆ライブ配信の告知
+本日、11月8日(土)20時〜ライブ配信します！
+
+
+◆動画タイムライン
+0:00 オープニング
+0:21 GPT-5-Codex-Miniがリリース
+4:01 GPT-5.1のリリース日
+5:20 Google DriveからNotebookLMへアップロード可能に
+7:16 新機能：Qoder CLIがOpenSpecをサポート
+8:36 JetBrains IDEにQoderプラグインが登場
+9:32 脳の活動を「文」に変換するAI
+11:46 コメント紹介
+14:34 ライブ配信の告知
+
+
+
+個人開発したブックマークアプリ
+『ClipTuck〜自分だけの本棚〜』※体験版👇
+https://ryukou-okumura.github.io/ClipTuck-trial/
+
+使い方note記事👇
+https://note.com/redcord/n/n394272c3c8e4
+
+開発秘話note記事👇
+https://note.com/redcord/n/n052e13c2df38
+
+フル版はnoteメンバーシップ限定でご利用いただけます👇
+https://note.com/redcord/membership/join?preview=true
+
+
+◆noteでもAIニュースやTipsをまとめています！
+https://note.com/redcord
+
+◆noteメンバーシップでは、ぶっちゃけ日記を書いてます！
+https://note.com/redcord/membership
+
+◆Xアカウントはこちら！
+https://x.com/redcord_okumura
+
+◆Genspark公式アンバサダーやってます！
+　こちらから登録してもらうと1,000クレジット多くもらえます！
+https://genspark.ai?via=okumura
+
+◆生成AIのセミナーやAI顧問の依頼はこちらから！
+https://forms.gle/YsLjCRwF8RUasGLy8
+
+◆僕の整体院のHPはこちら！
+https://physical-balance-lab.com
+
+◆整体院の公式Instagram！
+https://www.instagram.com/pbl.okumura</media:description>
+   <media:community>
+    <media:starRating count="38" average="5.00" min="1" max="5"/>
+    <media:statistics views="1670"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:iMX92AVKyWw</id>
+  <yt:videoId>iMX92AVKyWw</yt:videoId>
+  <yt:channelId>UCVAkt5l6kD4igMdVoEGTGIg</yt:channelId>
+  <title>【AIと個人開発】GitHubのリポジトリ管理を楽にするWEBアプリ！『DevBoard』が完成しました！使い方と開発裏話を共有します！</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=iMX92AVKyWw"/>
+  <author>
+   <name>AI整体師</name>
+   <uri>https://www.youtube.com/channel/UCVAkt5l6kD4igMdVoEGTGIg</uri>
+  </author>
+  <published>2025-11-07T10:01:23+00:00</published>
+  <updated>2025-11-08T06:59:31+00:00</updated>
+  <media:group>
+   <media:title>【AIと個人開発】GitHubのリポジトリ管理を楽にするWEBアプリ！『DevBoard』が完成しました！使い方と開発裏話を共有します！</media:title>
+   <media:content url="https://www.youtube.com/v/iMX92AVKyWw?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/iMX92AVKyWw/hqdefault.jpg" width="480" height="360"/>
+   <media:description>『DevBoard（デブボード）』はこちらから👇
+https://devboard.app
+ぜひ使ってみて感想を聞かせてください！！
+
+使い方をまとめたnote記事はこちら👇
+https://note.com/redcord/n/n8a9e8ba0e0f6
+
+
+◆動画タイムライン
+0:00 GitHubリポジトリ管理アプリ「DevBoard」の紹介
+2:22 DevBoardの使い方
+16:49 開発の裏話
+37:30 まとめと今後の展望
+
+
+
+
+個人開発したブックマークアプリ
+『ClipTuck〜自分だけの本棚〜』※体験版👇
+https://ryukou-okumura.github.io/ClipTuck-trial/
+
+使い方note記事👇
+https://note.com/redcord/n/n394272c3c8e4
+
+開発秘話note記事👇
+https://note.com/redcord/n/n052e13c2df38
+
+フル版はnoteメンバーシップ限定でご利用いただけます👇
+https://note.com/redcord/membership/join?preview=true
+
+
+◆noteでもAIニュースやTipsをまとめています！
+https://note.com/redcord
+
+◆noteメンバーシップでは、ぶっちゃけ日記を書いてます！
+https://note.com/redcord/membership
+
+◆Xアカウントはこちら！
+https://x.com/redcord_okumura
+
+◆Genspark公式アンバサダーやってます！
+　こちらから登録してもらうと1,000クレジット多くもらえます！
+https://genspark.ai?via=okumura
+
+◆生成AIのセミナーやAI顧問の依頼はこちらから！
+https://forms.gle/YsLjCRwF8RUasGLy8
+
+◆僕の整体院のHPはこちら！
+https://physical-balance-lab.com
+
+◆整体院の公式Instagram！
+https://www.instagram.com/pbl.okumura</media:description>
+   <media:community>
+    <media:starRating count="34" average="5.00" min="1" max="5"/>
+    <media:statistics views="717"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:s1oJVDNS9G4</id>
+  <yt:videoId>s1oJVDNS9G4</yt:videoId>
+  <yt:channelId>UCVAkt5l6kD4igMdVoEGTGIg</yt:channelId>
+  <title>【AIニュース #203】GPT 5.1 Thinkingが発見された！「Google Workspace Flows」がβ版で使えるように！Kimi K2 Thinking登場！</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=s1oJVDNS9G4"/>
+  <author>
+   <name>AI整体師</name>
+   <uri>https://www.youtube.com/channel/UCVAkt5l6kD4igMdVoEGTGIg</uri>
+  </author>
+  <published>2025-11-07T00:56:42+00:00</published>
+  <updated>2025-11-07T08:48:34+00:00</updated>
+  <media:group>
+   <media:title>【AIニュース #203】GPT 5.1 Thinkingが発見された！「Google Workspace Flows」がβ版で使えるように！Kimi K2 Thinking登場！</media:title>
+   <media:content url="https://www.youtube.com/v/s1oJVDNS9G4?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/s1oJVDNS9G4/hqdefault.jpg" width="480" height="360"/>
+   <media:description>【僕が気になったAIニューストピック15個】
+①ChatGPT上で「gpt-5-1-thinking」の新たな痕跡が確認され、GPT-5.1が確定。
+https://x.com/testingcatalog/status/1986369715074183606
+②新しいステルスモデル「Polaris Alpha」が本日公開されました。
+https://x.com/OpenRouterAI/status/1986524006296756488
+③先月クラウドタスクを使用したPlusおよびProユーザーに対して、11月20日まで有効な$200の無料クレジットを付与しました。
+https://x.com/OpenAIDevs/status/1986240264390709405
+④近日中には、CLIおよびIDE拡張機能に含まれる使用量とクレジットにより多くの価値を引き出すための、魅力的なアップデートも計画しています – 乞うご期待！
+https://x.com/OpenAIDevs/status/1986240265904857255
+⑤Kimi K2 Thinking！ オープンソースの思考エージェントモデルが登場しました。
+https://x.com/Kimi_Moonshot/status/1986449512538513505
+⑥研究論文を理解するためのKimi-K2のご紹介
+https://x.com/askalphaxiv/status/1986516825887437096
+⑦VertexでGemini3 Proが一部開放されているそうですが、注目すべきはコストでしょうか。
+https://x.com/yugen_matuni/status/1986486791076233523
+⑧Google Workspace上で使えるワークフロー構築ツール「Google Workspace Flows」がβ版で使えるように。
+https://x.com/dify_base/status/1986433528410874232
+⑨フラッシュカードとクイズが本日、モバイルアプリで正式にリリースされました！
+https://x.com/NotebookLM/status/1986480965724578098
+⑩Googleは、NotebookLM向けのChrome拡張機能を開発中です
+https://x.com/testingcatalog/status/1986560644896702903
+⑪Geminiはファイル検索ツールをリリースしました。
+https://x.com/_philschmid/status/1986506204240347520
+⑫Comet ブラウザがエージェント機能の大幅アップグレードを受けました。
+https://x.com/testingcatalog/status/1986529317824987275
+⑬Arcのお気に入りがさらにDiaに登場しました。
+https://x.com/diabrowser/status/1986480795398381624
+⑭私たちNotionは新しいChrome拡張機能をリリースしました！
+https://x.com/NotionHQ/status/1986479873712341183
+⑮ビル・ゲイツは最近、AIの進歩によって2034年には週2日勤務になると述べた。
+https://x.com/ikedanob/status/1985872375486038256
+
+◆コメント紹介
+はじめまして、いつもAIニュースを楽しく視聴させていただいております。
+私も非エンジニアですが、ClaudeCodeを使ってサービスを開発しています。
+今月リリースを目指しております。 
+サービスのセキュリティ対策はどのようにされていますか？ 
+正直、非エンジニアゆえにとても悩みました。 
+YouTubeにはバイブコーディングの動画はたくさんあるのですが、セキュリティ対策について深く言及した動画は少なく、私が行ったのは、次のうよなものでした。
+
+非エンジニアの私が偉そうに言える立場では決してないことを承知の上での投稿です。 何かの参考になればと思い、私の行ったことをあくまでも情報提供 ＆ ご参考までに書かせて頂きました。 
+AI整体師さんのサービスの発展を応援しております！！
+
+・ウェブセキュリティ界隈では有名な下記の通称「徳丸本」に記載の対策をClaudeCodeに実装依頼 
+・ここ２年間くらいの攻撃手法をClaudeCodeに調べてもらって対策を実装依頼 
+・ClaudeCodeや、ClaudeCodeのサブエージェント機能のセキュリティ対策担当者にお願いして対策依頼
+
+A：
+おぉ！ありがとうございます！！
+同じ非エンジニアの方の試行錯誤や情報はとても参考になります！！
+セキュリティは永遠の課題なので、僕ももっと勉強していきます！
+
+
+◆動画タイムライン
+0:00 オープニング
+0:23 ① ChatGPTとGPT-5.1の確定情報
+1:39 ② 新しいステルスモデル「Polaris Alpha」公開
+3:10 ③ PlusおよびProユーザーへの$200無料クレジット付与
+5:11 ④ CLIおよびIDE拡張機能のアップデート予告
+5:56 ⑤ オープンソースの思考エージェントモデル「Kimi K2 Thinking!」登場
+8:22 ⑥ 研究論文を理解するためのKimi-K2のご紹介
+9:06 ⑦ VertexでのGemini3 Pro一部開放
+10:36 ⑧ Google Workspace Flowsがβ版で利用可能に
+11:57 ⑨ NotebookLMのモバイルアプリでフラッシュカードとクイズが正式リリース
+12:42 ⑩ GoogleがNotebookLM向けのChrome拡張機能を開発中
+13:40 ⑪ Geminiがファイル検索ツールをリリース
+14:49 ⑫ Cometブラウザのエージェント機能が大幅アップグレード
+16:08 ⑬ Arcのお気に入りがDiaに登場
+17:06 ⑭ Notionの新しいChrome拡張機能がリリース
+17:55 ⑮ ビル・ゲイツ氏、2034年には週2日勤務になると予測
+20:12 ◆コメント紹介
+
+
+
+
+個人開発したブックマークアプリ
+『ClipTuck〜自分だけの本棚〜』※体験版👇
+https://ryukou-okumura.github.io/ClipTuck-trial/
+
+使い方note記事👇
+https://note.com/redcord/n/n394272c3c8e4
+
+開発秘話note記事👇
+https://note.com/redcord/n/n052e13c2df38
+
+フル版はnoteメンバーシップ限定でご利用いただけます👇
+https://note.com/redcord/membership/join?preview=true
+
+
+◆noteでもAIニュースやTipsをまとめています！
+https://note.com/redcord
+
+◆noteメンバーシップでは、ぶっちゃけ日記を書いてます！
+https://note.com/redcord/membership
+
+◆Xアカウントはこちら！
+https://x.com/redcord_okumura
+
+◆Genspark公式アンバサダーやってます！
+　こちらから登録してもらうと1,000クレジット多くもらえます！
+https://genspark.ai?via=okumura
+
+◆生成AIのセミナーやAI顧問の依頼はこちらから！
+https://forms.gle/YsLjCRwF8RUasGLy8
+
+◆僕の整体院のHPはこちら！
+https://physical-balance-lab.com
+
+◆整体院の公式Instagram！
+https://www.instagram.com/pbl.okumura</media:description>
+   <media:community>
+    <media:starRating count="51" average="5.00" min="1" max="5"/>
+    <media:statistics views="2449"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:DV7ltzVpy2I</id>
+  <yt:videoId>DV7ltzVpy2I</yt:videoId>
+  <yt:channelId>UCVAkt5l6kD4igMdVoEGTGIg</yt:channelId>
+  <title>【AIニュース #202】Gemini 3.0 Pro previewは11月に登場か！？Nano Banana 2も登場予定！？GPT-5 Proがパワーアップ！</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=DV7ltzVpy2I"/>
+  <author>
+   <name>AI整体師</name>
+   <uri>https://www.youtube.com/channel/UCVAkt5l6kD4igMdVoEGTGIg</uri>
+  </author>
+  <published>2025-11-06T00:53:56+00:00</published>
+  <updated>2025-11-06T08:00:37+00:00</updated>
+  <media:group>
+   <media:title>【AIニュース #202】Gemini 3.0 Pro previewは11月に登場か！？Nano Banana 2も登場予定！？GPT-5 Proがパワーアップ！</media:title>
+   <media:content url="https://www.youtube.com/v/DV7ltzVpy2I?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/DV7ltzVpy2I/hqdefault.jpg" width="480" height="360"/>
+   <media:description>【僕が気になったAIニューストピック11個】
+①Gemini 3.0 pro preview-11-2025、今月登場！
+https://x.com/kimmonismus/status/1986068629524566416
+②GoogleがNano Banana 2、「GEMPIX2」を今後のリリースに向けて準備中です！
+https://x.com/testingcatalog/status/1985873369531891853
+③スタジオの出力に使用されたカスタマイズプロンプトを今すぐ閲覧できます！
+https://x.com/NotebookLM/status/1986096181076963568
+④『 まじん式 v4 』 2025年11月14日(金) リリース予定。
+https://x.com/Majin_AppSheet/status/1986090700816130086
+⑤Gemini Deep Research が現在、Mail、Search、Drive、Chat に接続できるようになりました。
+https://x.com/ai_for_success/status/1986141226136183062
+⑥ChatGPTは長時間実行中のクエリを中断し、再起動せずに新しいコンテキストを追加して進捗を失うことなく作業を進められます。
+https://x.com/OpenAI/status/1986194298971590988
+⑦OpenAIの内部関係者とされる人物による、近日公開予定の GPT-5 モデルのジューシーな詳細の噂
+https://x.com/mark_k/status/1986019901765505495
+⑧今すぐ、独自のスライドテンプレートをManusにアップロードできます！
+https://x.com/ManusAI/status/1986085370606559349
+⑨GensparkがSlackで利用できるようになりました！
+https://x.com/genspark_japan/status/1986010602154918239
+⑩Skywork Browser が登場しました
+https://x.com/skywork_ai_jp/status/1986033252126310888
+⑪ソフトバンク、国産LLM「Sarashina」のAPIサービス開始
+https://x.com/itm_aiplus/status/1985916256554532997
+
+◆コメント紹介
+私も非エンジニアです。GASは、スプレッドシートに紐づいたかたちでしか使ってないのでデプロイは必要なく社内の作業効率化に色々と使ってます。
+その場合は、単一のスクリプトでChatGPTなどでサクサクGASを書けるし、権限設定もファイル単位でめちゃくちゃ簡単なのですが、WEBアプリとしてデプロイして公開するとなるとGASでも一気にハードルが上がりそうですね。
+
+A：逆に僕はスプシに紐づいた形のGASを使ったことがないので、そっちも作ってみたいと思ってます！！ GASは可能性の幅が広そうなのでワクワクしてます！！
+
+◆登録者4,900人突破しました！
+
+
+◆動画タイムライン
+0:00 - オープニング
+0:18 - ① Gemini 3.0 Proのプレビュー版が今月登場か
+1:47 - ② GoogleがNano Banana 2、「GEMPIX2」を準備中
+3:00 - ③ NotebookLMでカスタマイズプロンプトが閲覧可能に
+4:11 - ④ 『 まじん式 v4 』が11月14日にリリース予定
+5:01 - ⑤ Gemini Deep Researchの接続機能が拡充
+6:22 - ⑥ ChatGPTが長時間実行中のクエリを中断・再開可能に
+7:42 - ⑦ 近日公開予定のGPT-5モデルに関する噂
+8:58 - ⑧ Manusに独自のスライドテンプレートをアップロード可能に
+9:47 - ⑨ GensparkがSlackで利用可能に
+10:52 - ⑩ Skywork Browserが登場
+12:05 - ⑪ ソフトバンク、国産LLM「Sarashina」のAPIサービス開始
+13:45 - コメント紹介
+15:59 - チャンネル登録者4,900人突破しました！
+
+
+
+個人開発したブックマークアプリ
+『ClipTuck〜自分だけの本棚〜』※体験版👇
+https://ryukou-okumura.github.io/ClipTuck-trial/
+
+使い方note記事👇
+https://note.com/redcord/n/n394272c3c8e4
+
+開発秘話note記事👇
+https://note.com/redcord/n/n052e13c2df38
+
+フル版はnoteメンバーシップ限定でご利用いただけます👇
+https://note.com/redcord/membership/join?preview=true
+
+
+◆noteでもAIニュースやTipsをまとめています！
+https://note.com/redcord
+
+◆noteメンバーシップでは、ぶっちゃけ日記を書いてます！
+https://note.com/redcord/membership
+
+◆Xアカウントはこちら！
+https://x.com/redcord_okumura
+
+◆Genspark公式アンバサダーやってます！
+　こちらから登録してもらうと1,000クレジット多くもらえます！
+https://genspark.ai?via=okumura
+
+◆生成AIのセミナーやAI顧問の依頼はこちらから！
+https://forms.gle/YsLjCRwF8RUasGLy8
+
+◆僕の整体院のHPはこちら！
+https://physical-balance-lab.com
+
+◆整体院の公式Instagram！
+https://www.instagram.com/pbl.okumura</media:description>
+   <media:community>
+    <media:starRating count="56" average="5.00" min="1" max="5"/>
+    <media:statistics views="2389"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:0xFOAS4cyxs</id>
+  <yt:videoId>0xFOAS4cyxs</yt:videoId>
+  <yt:channelId>UCVAkt5l6kD4igMdVoEGTGIg</yt:channelId>
+  <title>【ライブ配信#47】せっかくWEB版Claude Codeのクレジットもらったので、色々試しながらみんなで色々雑談を楽しむ！</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=0xFOAS4cyxs"/>
+  <author>
+   <name>AI整体師</name>
+   <uri>https://www.youtube.com/channel/UCVAkt5l6kD4igMdVoEGTGIg</uri>
+  </author>
+  <published>2025-11-05T14:00:49+00:00</published>
+  <updated>2025-11-06T09:22:12+00:00</updated>
+  <media:group>
+   <media:title>【ライブ配信#47】せっかくWEB版Claude Codeのクレジットもらったので、色々試しながらみんなで色々雑談を楽しむ！</media:title>
+   <media:content url="https://www.youtube.com/v/0xFOAS4cyxs?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/0xFOAS4cyxs/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="11" average="5.00" min="1" max="5"/>
+    <media:statistics views="355"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:4Tiq4NgNeiI</id>
+  <yt:videoId>4Tiq4NgNeiI</yt:videoId>
+  <yt:channelId>UCVAkt5l6kD4igMdVoEGTGIg</yt:channelId>
+  <title>【AIニュース #201】WEB版Claude Code！250〜1,000ドル分クレジットを提供中！Cursorがまたさらに使いやすくアップデート！ジブリがOpenAIに要請書提出？</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=4Tiq4NgNeiI"/>
+  <author>
+   <name>AI整体師</name>
+   <uri>https://www.youtube.com/channel/UCVAkt5l6kD4igMdVoEGTGIg</uri>
+  </author>
+  <published>2025-11-05T00:41:56+00:00</published>
+  <updated>2025-11-06T09:24:54+00:00</updated>
+  <media:group>
+   <media:title>【AIニュース #201】WEB版Claude Code！250〜1,000ドル分クレジットを提供中！Cursorがまたさらに使いやすくアップデート！ジブリがOpenAIに要請書提出？</media:title>
+   <media:content url="https://www.youtube.com/v/4Tiq4NgNeiI?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/4Tiq4NgNeiI/hqdefault.jpg" width="480" height="360"/>
+   <media:description>【僕が気になったAIニューストピック12個】
+①Canva、クリエイティブOSを発表
+https://x.com/mnishi41/status/1985565465419403762
+②WEB版Claude Code期間限定（11月18日まで）提供中：
+https://x.com/_catwu/status/1985754413429113409
+③Windsurf Codemapsが登場！「AIに任せる前に理解する」という新しいコード支援の形
+https://x.com/akira_papa_IT/status/1985798508419637577
+④Cursor にいくつかのクオリティ・オブ・ライフの改善をリリースしました！
+https://x.com/cursor_ai/status/1985791854739390591
+⑤JetBrains AI Assistant と Junie はまもなく BYOK サポートを提供し、OpenAI、Anthropic、Gemini などの独自の AI アカウントを IDE に直接接続できるようになります。
+https://x.com/jetbrains/status/1985686741416583193
+⑥Codexは、過去数か月でOpenAIが構築するやり方を変革しました。素晴らしい今後のモデルもいくつかあります。
+https://x.com/sama/status/1985814135784042993
+⑦Codex CLI 0.54.0 がさきほど出ました！
+https://x.com/engix_dev/status/1985786436407476344
+⑧Sora アプリが Android でも！
+https://x.com/schroneko/status/1985768112894198010
+⑨ジブリ、オープンAIに「コンテンツの無断学習を中止せよ」と要請書(中央日報日本語版)
+https://x.com/AInokoto1029/status/1985591209306579243
+⑩迫る「AIリストラ」の現実　米企業95万人削減
+https://x.com/MinatoYuichiro/status/1985498827588321773
+⑪# アップル、次期「Siri」にグーグル「Gemini」採用か
+https://japan.cnet.com/article/35240011/
+⑫Which one is AI?
+https://x.com/interesting_aIl/status/1985618568575070378
+
+◆コメント紹介
+SWE1.5を数日使用した素人の肌感ですが、
+①簡単かつ世界的に需要が多いアプリ群（業務管理や日常使用系）は爆速で完成。
+②中難度かつ世界的に需要多めアプリは何度か手直し必要。
+③中難度かつ需要少なめアプリはほとんど完成に至らず。
+④高難度かつ需要多めアプリも完成に至らず、そもそも構造から失敗している傾向あり（Codexとの比較です）。
+ただ、日常使う系のアプリは簡単・爆速に作成できるので、組み合わせ次第でローカル環境を自分好みにできそうです。AWSやAZULのトラブルもあったので臨時用のローカル業務アプリくらいは実用性ある感じでした
+
+A：
+おぉ！わかりやすいまとめ、ありがとうございます！！😆
+①と②だけでも爆速で回せるなら、かなり良いですね！！
+速さの開発体験の良さは感じるので、使ってみたくなりますね！笑
+
+
+◆動画タイムライン
+0:00 オープニング
+0:20 ①Canva、クリエイティブOSを発表
+1:54 ②WEB版Claude Code期間限定（11月18日まで）提供中
+3:07 ③Windsurf Codemapsが登場！
+4:51 ④Cursor にいくつかのクオリティ・オブ・ライフの改善をリリース
+7:01 ⑤JetBrains AI Assistant と Junie はまもなく BYOK サポートを提供
+8:25 ⑥Codexは、過去数か月でOpenAIが構築するやり方を変革
+9:30 ⑦Codex CLI 0.54.0 がさきほど出ました！
+10:34 ⑧Sora アプリが Android でも！
+11:04 ⑨ジブリ、オープンAIに「コンテンツの無断学習を中止せよ」と要請書
+11:55 ⑩迫る「AIリストラ」の現実　米企業95万人削減
+13:36 ⑪アップル、次期「Siri」にグーグル「Gemini」採用か
+14:36 ⑫Which one is AI?
+16:22 コメント紹介
+
+
+個人開発したブックマークアプリ
+『ClipTuck〜自分だけの本棚〜』※体験版👇
+https://ryukou-okumura.github.io/ClipTuck-trial/
+
+使い方note記事👇
+https://note.com/redcord/n/n394272c3c8e4
+
+開発秘話note記事👇
+https://note.com/redcord/n/n052e13c2df38
+
+フル版はnoteメンバーシップ限定でご利用いただけます👇
+https://note.com/redcord/membership/join?preview=true
+
+
+◆noteでもAIニュースやTipsをまとめています！
+https://note.com/redcord
+
+◆noteメンバーシップでは、ぶっちゃけ日記を書いてます！
+https://note.com/redcord/membership
+
+◆Xアカウントはこちら！
+https://x.com/redcord_okumura
+
+◆Genspark公式アンバサダーやってます！
+　こちらから登録してもらうと1,000クレジット多くもらえます！
+https://genspark.ai?via=okumura
+
+◆生成AIのセミナーやAI顧問の依頼はこちらから！
+https://forms.gle/YsLjCRwF8RUasGLy8
+
+◆僕の整体院のHPはこちら！
+https://physical-balance-lab.com
+
+◆整体院の公式Instagram！
+https://www.instagram.com/pbl.okumura</media:description>
+   <media:community>
+    <media:starRating count="35" average="5.00" min="1" max="5"/>
+    <media:statistics views="1521"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:zBulJ8Nsc2o</id>
+  <yt:videoId>zBulJ8Nsc2o</yt:videoId>
+  <yt:channelId>UCVAkt5l6kD4igMdVoEGTGIg</yt:channelId>
+  <title>【AI試してみた】今更ながらバージョンアップしたGoogle AI Studioで、GASのWEBアプリを作ってみた！使いやすいし、早いし、無料だし結構よかった！</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=zBulJ8Nsc2o"/>
+  <author>
+   <name>AI整体師</name>
+   <uri>https://www.youtube.com/channel/UCVAkt5l6kD4igMdVoEGTGIg</uri>
+  </author>
+  <published>2025-11-04T09:01:39+00:00</published>
+  <updated>2025-11-06T08:28:41+00:00</updated>
+  <media:group>
+   <media:title>【AI試してみた】今更ながらバージョンアップしたGoogle AI Studioで、GASのWEBアプリを作ってみた！使いやすいし、早いし、無料だし結構よかった！</media:title>
+   <media:content url="https://www.youtube.com/v/zBulJ8Nsc2o?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/zBulJ8Nsc2o/hqdefault.jpg" width="480" height="360"/>
+   <media:description>前より明らかに使いやすくなってる！
+UI次第で印象変わるね！
+
+Google AI StudioのURL👇
+https://aistudio.google.com
+
+
+個人開発したブックマークアプリ
+『ClipTuck〜自分だけの本棚〜』※体験版👇
+https://ryukou-okumura.github.io/ClipTuck-trial/
+
+使い方note記事👇
+https://note.com/redcord/n/n394272c3c8e4
+
+開発秘話note記事👇
+https://note.com/redcord/n/n052e13c2df38
+
+フル版はnoteメンバーシップ限定でご利用いただけます👇
+https://note.com/redcord/membership/join?preview=true
+
+
+◆noteでもAIニュースやTipsをまとめています！
+https://note.com/redcord
+
+◆noteメンバーシップでは、ぶっちゃけ日記を書いてます！
+https://note.com/redcord/membership
+
+◆Xアカウントはこちら！
+https://x.com/redcord_okumura
+
+◆Genspark公式アンバサダーやってます！
+　こちらから登録してもらうと1,000クレジット多くもらえます！
+https://genspark.ai?via=okumura
+
+◆生成AIのセミナーやAI顧問の依頼はこちらから！
+https://forms.gle/YsLjCRwF8RUasGLy8
+
+◆僕の整体院のHPはこちら！
+https://physical-balance-lab.com
+
+◆整体院の公式Instagram！
+https://www.instagram.com/pbl.okumura</media:description>
+   <media:community>
+    <media:starRating count="22" average="5.00" min="1" max="5"/>
+    <media:statistics views="917"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:WTm-d6dsECQ</id>
+  <yt:videoId>WTm-d6dsECQ</yt:videoId>
+  <yt:channelId>UCVAkt5l6kD4igMdVoEGTGIg</yt:channelId>
+  <title>【AIニュース #200】GeminiのcanvasでGoogleスライドが作れる！また新たにコーディングつよつよAIツールが登場！イーロン・マスク「5、6年後には全てAIが管理する」</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=WTm-d6dsECQ"/>
+  <author>
+   <name>AI整体師</name>
+   <uri>https://www.youtube.com/channel/UCVAkt5l6kD4igMdVoEGTGIg</uri>
+  </author>
+  <published>2025-11-04T01:04:46+00:00</published>
+  <updated>2025-11-04T07:32:41+00:00</updated>
+  <media:group>
+   <media:title>【AIニュース #200】GeminiのcanvasでGoogleスライドが作れる！また新たにコーディングつよつよAIツールが登場！イーロン・マスク「5、6年後には全てAIが管理する」</media:title>
+   <media:content url="https://www.youtube.com/v/WTm-d6dsECQ?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/WTm-d6dsECQ/hqdefault.jpg" width="480" height="360"/>
+   <media:description>【僕が気になったAIニューストピック9個】
+①新しく登場！Skywork のテンプレート機能
+https://x.com/skywork_ai_jp/status/1985270738039820570
+②Geminiに「プレゼンテーションを作成」と一言で指示するだけで（そしてプロジェクトのメモもすべて）操作できるようになりました。
+https://x.com/GeminiApp/status/1985465713096794294
+③Claude Agent SDK にプラグインを使用する機能を追加しました。
+https://x.com/trq212/status/1985456238713512440
+④Claude Skills Marketplaceは2,300以上が無料で使えます
+https://x.com/EXM7777/status/1985355967324971087
+⑤Verdent AIがSWE-bench Verified で76.1%の単一試行解決率を達成しました。
+https://x.com/kimmonismus/status/1985388382550425835
+⑥こういうアプリを中学生が作ってしまう時代なのか…
+https://x.com/kenn/status/1985008434627100961
+⑦OpenAIとの新たな複数年戦略的パートナーシップにより、当社の業界をリードするインフラを活用して、ChatGPT の推論、トレーニング、およびエージェント型 AI ワークロードの実行とスケーリングが可能になります。
+https://x.com/ajassy/status/1985351258333643172
+⑧サム・アルトマンが語る「2026年までにGPTモデルが独自に科学研究を行い、解決策を発見する時代」の実例。
+https://x.com/Suzacque/status/1985123361132061099
+⑨イーロン・マスク氏、衝撃の発言「５、６年後にXのサービスやアプリはなくなる。AIに吸収され、すべてAIが管理するようになる。
+https://x.com/turningpointjpn/status/1984573632505680318
+
+◆コメント紹介
+いつも楽しみに拝見しています。毎回新しい情報をありがとうございます。色々な情報を参考に、試しに、Windsurf,Claude,ChatGPTで数ヶ月に渡って、趣味でアプリ（ゲームではなく、工学系）を作ってますが、中々うまく行かないな...と。Windsurfは確かに早いし、ソースの見直しをさせたら、観点が違うのがよく分かりました。しかし、実施に、アプリのある不具合を修正しようとすると、agentに関係なく、転けまくって、結局、最後に解決したのは、VS code＋ChatPGTプラグインでした。Vibe Codingは、指示がうまく伝わらないのと、AIは、指示した以外のところを弄るので厄介です。今回は、ChatGPTで解決しましたが、常に、そうとは限らないだろうなとうのが感想です。
+
+A：
+コメントありがとうございます！
+モデルによって性格も違うし、得意不得意も違うので、特性を掴むのは大変ですよね！
+バグの修正はCodexに頼ることが多いので、使い分けが大事なんだと痛感する日々です！
+
+
+◆動画タイムライン
+0:00 オープニング
+0:27 新しく登場！Skywork のテンプレート機能
+1:04 Geminiに「プレゼンテーションを作成」と一言で指示するだけで操作可能に
+2:19 Claude Agent SDK にプラグインを使用する機能を追加
+3:13 Claude Skills Marketplaceは2,300以上が無料で利用可能
+4:18 Verdent AIがSWE-bench Verifiedで76.1%の単一試行解決率を達成
+7:19 中学生がアプリを作ってしまう時代
+8:18 OpenAIとAWSの新たな複数年戦略的パートナーシップ
+9:15 サム・アルトマンが語る「2026年までにGPTモデルが独自に科学研究を行い、解決策を発見する時代」の実例
+11:00 イーロン・マスク氏の衝撃の発言
+12:36 コメント紹介
+
+
+
+個人開発したブックマークアプリ
+『ClipTuck〜自分だけの本棚〜』※体験版👇
+https://ryukou-okumura.github.io/ClipTuck-trial/
+
+使い方note記事👇
+https://note.com/redcord/n/n394272c3c8e4
+
+開発秘話note記事👇
+https://note.com/redcord/n/n052e13c2df38
+
+フル版はnoteメンバーシップ限定でご利用いただけます👇
+https://note.com/redcord/membership/join?preview=true
+
+
+◆noteでもAIニュースやTipsをまとめています！
+https://note.com/redcord
+
+◆noteメンバーシップでは、ぶっちゃけ日記を書いてます！
+https://note.com/redcord/membership
+
+◆Xアカウントはこちら！
+https://x.com/redcord_okumura
+
+◆Genspark公式アンバサダーやってます！
+　こちらから登録してもらうと1,000クレジット多くもらえます！
+https://genspark.ai?via=okumura
+
+◆生成AIのセミナーやAI顧問の依頼はこちらから！
+https://forms.gle/YsLjCRwF8RUasGLy8
+
+◆僕の整体院のHPはこちら！
+https://physical-balance-lab.com
+
+◆整体院の公式Instagram！
+https://www.instagram.com/pbl.okumura</media:description>
+   <media:community>
+    <media:starRating count="38" average="5.00" min="1" max="5"/>
+    <media:statistics views="1718"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:YsXFBeK29nU</id>
+  <yt:videoId>YsXFBeK29nU</yt:videoId>
+  <yt:channelId>UCVAkt5l6kD4igMdVoEGTGIg</yt:channelId>
+  <title>【AIニュース #199】Notebook LMにサイレントアップデート！Chromeブラウザのsplit view設定の方法！Qwen3 Max Thinkingが登場！</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=YsXFBeK29nU"/>
+  <author>
+   <name>AI整体師</name>
+   <uri>https://www.youtube.com/channel/UCVAkt5l6kD4igMdVoEGTGIg</uri>
+  </author>
+  <published>2025-11-03T00:40:31+00:00</published>
+  <updated>2025-11-03T07:41:40+00:00</updated>
+  <media:group>
+   <media:title>【AIニュース #199】Notebook LMにサイレントアップデート！Chromeブラウザのsplit view設定の方法！Qwen3 Max Thinkingが登場！</media:title>
+   <media:content url="https://www.youtube.com/v/YsXFBeK29nU?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/YsXFBeK29nU/hqdefault.jpg" width="480" height="360"/>
+   <media:description>【僕が気になったAIニューストピック7個】
+①Notebook LMがアップデート
+https://x.com/tokumin/status/1984902777404101109
+②Claude CodeからNotebookLMに接続できるskill
+https://x.com/gosukenator/status/1984811024080679294
+③GoogleがOpalワークフロービルダーの新しいAgentブロックを開発中です。
+https://x.com/testingcatalog/status/1985012333526016081
+④Chromeのタブ分割が出てこない方へ
+https://x.com/Majin_AppSheet/status/1984520896502288577
+⑤SWE-1.5向けに追加の速度最適化
+https://x.com/cerebras/status/1984353299081150512
+⑥Kimi CLI テクニカルプレビュー＆Kimi For Codingのご紹介！
+https://x.com/Kimi_Moonshot/status/1984207733177090274
+⑦Qwen3-Max-Thinkingが登場
+https://x.com/cherry_cc12/status/1984987159028465707
+
+◆チャンネル登録者4,800人ありがとうございます！
+https://x.com/redcord_okumura/status/1984058081270231378
+
+
+◆動画タイムライン
+0:00 オープニング
+0:22 Notebook LMがアップデート
+1:57 Claude CodeからNotebookLMに接続できるskill
+3:08 GoogleがOpalワークフロービルダーの新しいAgentブロックを開発中
+4:01 Chromeのタブ分割が出てこない方へ
+5:05 SWE-1.5向けに追加の速度最適化
+6:55 Kimi CLI テクニカルプレビュー＆Kimi For Codingのご紹介！
+8:14 Qwen3-Max-Thinkingが登場
+9:36 チャンネル登録者4,800人ありがとうございます！
+
+
+
+個人開発したブックマークアプリ
+『ClipTuck〜自分だけの本棚〜』※体験版👇
+https://ryukou-okumura.github.io/ClipTuck-trial/
+
+使い方note記事👇
+https://note.com/redcord/n/n394272c3c8e4
+
+開発秘話note記事👇
+https://note.com/redcord/n/n052e13c2df38
+
+フル版はnoteメンバーシップ限定でご利用いただけます👇
+https://note.com/redcord/membership/join?preview=true
+
+
+◆noteでもAIニュースやTipsをまとめています！
+https://note.com/redcord
+
+◆noteメンバーシップでは、ぶっちゃけ日記を書いてます！
+https://note.com/redcord/membership
+
+◆Xアカウントはこちら！
+https://x.com/redcord_okumura
+
+◆Genspark公式アンバサダーやってます！
+　こちらから登録してもらうと1,000クレジット多くもらえます！
+https://genspark.ai?via=okumura
+
+◆生成AIのセミナーやAI顧問の依頼はこちらから！
+https://forms.gle/YsLjCRwF8RUasGLy8
+
+◆僕の整体院のHPはこちら！
+https://physical-balance-lab.com
+
+◆整体院の公式Instagram！
+https://www.instagram.com/pbl.okumura</media:description>
+   <media:community>
+    <media:starRating count="41" average="5.00" min="1" max="5"/>
+    <media:statistics views="1859"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:6MRKCuVfrwI</id>
+  <yt:videoId>6MRKCuVfrwI</yt:videoId>
+  <yt:channelId>UCVAkt5l6kD4igMdVoEGTGIg</yt:channelId>
+  <title>【GPTラジオ #30】最近「マルチエージェント」が流行ってるのはなんで？ジピちゃんも将来は「マルチジピちゃん」になる！？</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=6MRKCuVfrwI"/>
+  <author>
+   <name>AI整体師</name>
+   <uri>https://www.youtube.com/channel/UCVAkt5l6kD4igMdVoEGTGIg</uri>
+  </author>
+  <published>2025-11-02T01:00:07+00:00</published>
+  <updated>2025-11-02T07:32:31+00:00</updated>
+  <media:group>
+   <media:title>【GPTラジオ #30】最近「マルチエージェント」が流行ってるのはなんで？ジピちゃんも将来は「マルチジピちゃん」になる！？</media:title>
+   <media:content url="https://www.youtube.com/v/6MRKCuVfrwI?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/6MRKCuVfrwI/hqdefault.jpg" width="480" height="360"/>
+   <media:description>ジピちゃん、なんか感じ変わったよね？
+
+
+◆楽曲
+曲名：『僕らの物語』
+作詞：ChatGPT＆AI整体師
+作曲：Suno.AI v5</media:description>
+   <media:community>
+    <media:starRating count="7" average="5.00" min="1" max="5"/>
+    <media:statistics views="245"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:ee7RNwSMlU4</id>
+  <yt:videoId>ee7RNwSMlU4</yt:videoId>
+  <yt:channelId>UCVAkt5l6kD4igMdVoEGTGIg</yt:channelId>
+  <title>【AIニュース #198】「Gemini 3.0」は年内リリース予定で確定か！？Notebook LMにスプレットシートが入れられるように！Claude Codeのインストール方法が変更！</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=ee7RNwSMlU4"/>
+  <author>
+   <name>AI整体師</name>
+   <uri>https://www.youtube.com/channel/UCVAkt5l6kD4igMdVoEGTGIg</uri>
+  </author>
+  <published>2025-11-01T03:43:25+00:00</published>
+  <updated>2025-11-01T07:06:47+00:00</updated>
+  <media:group>
+   <media:title>【AIニュース #198】「Gemini 3.0」は年内リリース予定で確定か！？Notebook LMにスプレットシートが入れられるように！Claude Codeのインストール方法が変更！</media:title>
+   <media:content url="https://www.youtube.com/v/ee7RNwSMlU4?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/ee7RNwSMlU4/hqdefault.jpg" width="480" height="360"/>
+   <media:description>【僕が気になったAIニューストピック9個】
+①「Gemini 3」は年内リリース予定──Google・ピチャイCEOが投稿
+https://x.com/itm_aiplus/status/1984126966287695932
+②NotebookLMでソースとしてスプシが追加できるように。
+https://x.com/mugu_KagawaAI/status/1984198382311940145
+③GoogleのNotebookLMが、100万トークンのコンテキストウィンドウに対応など
+https://x.com/chromeunboxed/status/1983926254819504592
+④GoogleのGemini CLIを使って、CodeRabbitを完全なエージェントループで利用できます！
+https://x.com/coderabbitai/status/1984299304018653418
+⑤Claude Code のネイティブインストーラーが現在、一般提供されています。
+https://x.com/claudeai/status/1984304957353243061
+⑥Cursor 2.0 は今、以下のことができます：
+https://x.com/leerob/status/1984353358103052396
+⑦エージェントモードをオンにすると、ChatGPT があなたに代わって行動を起こせます—調べ物、計画立案、作業の実行を、ブラウジング中に。
+https://x.com/OpenAI/status/1984304194837528864
+⑧OpenAIは、ウェブアプリ向けにキャラクター作成機能を開発中です！
+https://x.com/testingcatalog/status/1984065404017508630
+⑨OperaはDeep Research agentをリリース！
+https://x.com/opera/status/1984236452620943390
+
+※今日のライブ配信はお休みします！申し訳ないです🙇‍♂️
+
+
+◆動画タイムライン
+0:00 - オープニング
+0:21 - ①「Gemini 3」は年内リリース予定
+2:27 - ② NotebookLMでスプレッドシートが追加可能に
+3:14 - ③ GoogleのNotebookLMが100万トークンに対応
+4:12 - ④ Gemini CLIでCodeRabbitが利用可能に
+5:16 - ⑤ Claude Codeのネイティブインストーラー提供開始
+6:45 - ⑥ Cursor 2.0の新機能
+8:11 - ⑦ ChatGPTのエージェントモードが安定化
+9:06 - ⑧ OpenAIがキャラクター作成機能を開発中
+9:49 - ⑨ OperaがDeep Research agentをリリース
+11:07 - 今日のライブ配信についてのお知らせ
+
+
+個人開発したブックマークアプリ
+『ClipTuck〜自分だけの本棚〜』※体験版👇
+https://ryukou-okumura.github.io/ClipTuck-trial/
+
+使い方note記事👇
+https://note.com/redcord/n/n394272c3c8e4
+
+開発秘話note記事👇
+https://note.com/redcord/n/n052e13c2df38
+
+フル版はnoteメンバーシップ限定でご利用いただけます👇
+https://note.com/redcord/membership/join?preview=true
+
+
+◆noteでもAIニュースやTipsをまとめています！
+https://note.com/redcord
+
+◆noteメンバーシップでは、ぶっちゃけ日記を書いてます！
+https://note.com/redcord/membership
+
+◆Xアカウントはこちら！
+https://x.com/redcord_okumura
+
+◆Genspark公式アンバサダーやってます！
+　こちらから登録してもらうと1,000クレジット多くもらえます！
+https://genspark.ai?via=okumura
+
+◆生成AIのセミナーやAI顧問の依頼はこちらから！
+https://forms.gle/YsLjCRwF8RUasGLy8
+
+◆僕の整体院のHPはこちら！
+https://physical-balance-lab.com
+
+◆整体院の公式Instagram！
+https://www.instagram.com/pbl.okumura</media:description>
+   <media:community>
+    <media:starRating count="56" average="5.00" min="1" max="5"/>
+    <media:statistics views="1962"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:fz30_yHH3D8</id>
+  <yt:videoId>fz30_yHH3D8</yt:videoId>
+  <yt:channelId>UCVAkt5l6kD4igMdVoEGTGIg</yt:channelId>
+  <title>【AI試してみた】「Cursor 2.0」勢いで課金したけど後悔してない！！非エンジニアの僕にはどストライクです！！という話をしたい！！</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=fz30_yHH3D8"/>
+  <author>
+   <name>AI整体師</name>
+   <uri>https://www.youtube.com/channel/UCVAkt5l6kD4igMdVoEGTGIg</uri>
+  </author>
+  <published>2025-10-31T10:01:15+00:00</published>
+  <updated>2025-11-01T07:35:28+00:00</updated>
+  <media:group>
+   <media:title>【AI試してみた】「Cursor 2.0」勢いで課金したけど後悔してない！！非エンジニアの僕にはどストライクです！！という話をしたい！！</media:title>
+   <media:content url="https://www.youtube.com/v/fz30_yHH3D8?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/fz30_yHH3D8/hqdefault.jpg" width="480" height="360"/>
+   <media:description>マジで楽しいっす！
+あと、Haiku4.5とGrok codeが結構優秀！
+
+
+◆動画タイムライン
+0:00 - はじめに
+0:34 - 新機能の多くは課金が必要
+0:57 - 課金して後悔なし！開発体験が楽しい
+2:24 - 新機能の紹介①：ブラウザタブ
+3:51 - AIとブラウザタブを連携させたコーディングデモ
+8:44 - 新機能の紹介②：マルチエージェント機能
+11:40 - マルチエージェント機能のデモ
+19:28 - 各AIモデルのコストについて
+24:28 - まとめ
+
+
+個人開発したブックマークアプリ
+『ClipTuck〜自分だけの本棚〜』※体験版👇
+https://ryukou-okumura.github.io/ClipTuck-trial/
+
+使い方note記事👇
+https://note.com/redcord/n/n394272c3c8e4
+
+開発秘話note記事👇
+https://note.com/redcord/n/n052e13c2df38
+
+フル版はnoteメンバーシップ限定でご利用いただけます👇
+https://note.com/redcord/membership/join?preview=true
+
+
+◆noteでもAIニュースやTipsをまとめています！
+https://note.com/redcord
+
+◆noteメンバーシップでは、ぶっちゃけ日記を書いてます！
+https://note.com/redcord/membership
+
+◆Xアカウントはこちら！
+https://x.com/redcord_okumura
+
+◆Genspark公式アンバサダーやってます！
+　こちらから登録してもらうと1,000クレジット多くもらえます！
+https://genspark.ai?via=okumura
+
+◆生成AIのセミナーやAI顧問の依頼はこちらから！
+https://forms.gle/YsLjCRwF8RUasGLy8
+
+◆僕の整体院のHPはこちら！
+https://physical-balance-lab.com
+
+◆整体院の公式Instagram！
+https://www.instagram.com/pbl.okumura</media:description>
+   <media:community>
+    <media:starRating count="83" average="5.00" min="1" max="5"/>
+    <media:statistics views="4180"/>
+   </media:community>
+  </media:group>
+ </entry>
+</feed>

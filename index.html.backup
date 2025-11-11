@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video URL List Tool</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Video URL List Tool</h1>
+
+    <p class="description">
+      YouTube チャンネルに対応した動画URL・タイトル・公開日の取得ツール（最新15件まで）
+    </p>
+
+    <div class="info-box">
+      <strong>対応形式:</strong>
+      <ul class="info-list">
+        <li>✅ UC1234567890abcdefghij（チャンネルID）</li>
+        <li>✅ https://www.youtube.com/channel/UC...（チャンネルURL）</li>
+        <li>❌ @username、/c/channelname（非対応）</li>
+      </ul>
+    </div>
+
+    <div class="info-box warning-box">
+      <strong>プライバシーに関する注意:</strong><br>
+      本ツールを使用すると、入力したチャンネルIDとIPアドレスが第三者サービス（CORS Proxy、YouTube）に送信されます。「取得」ボタンをクリックすることで、この情報送信に同意したものとみなします。
+    </div>
+
+    <div class="form-group">
+      <label for="channelInput">チャンネルID/URL（1行1件）:</label>
+      <textarea id="channelInput" rows="5" placeholder="UC1234567890abcdefghij&#10;https://www.youtube.com/channel/UC..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="limitSelect">取得件数:</label>
+      <select id="limitSelect">
+        <option value="5">最新5件</option>
+        <option value="10">最新10件</option>
+        <option value="15" selected>最新15件（最大）</option>
+      </select>
+    </div>
+
+    <fieldset class="form-group date-filter-fieldset">
+      <legend class="date-filter-legend">📅 日付範囲フィルター（オプション）</legend>
+
+      <div class="date-range-container">
+        <div class="date-input-group">
+          <label for="startDate" class="date-label">開始日:</label>
+          <input type="date" id="startDate" class="date-input" max="">
+        </div>
+
+        <div class="date-input-group">
+          <label for="endDate" class="date-label">終了日:</label>
+          <input type="date" id="endDate" class="date-input" max="">
+        </div>
+
+        <button type="button" id="clearDates" class="clear-dates-btn">クリア</button>
+      </div>
+
+      <p class="date-hint">
+        💡 範囲を指定すると、その期間内の動画のみを表示します（空欄の場合は全件取得）<br>
+        <small>※ YouTube RSSは最新15件のみを返します。古い日付を指定しても0件になる場合があります。</small>
+      </p>
+    </fieldset>
+
+    <button id="fetchButton">取得</button>
+
+    <div id="loading" class="loading" role="status" aria-live="polite" hidden>
+      <div class="spinner"></div>
+      <p id="loadingText">取得中...</p>
+    </div>
+
+    <div id="errors" class="errors" aria-live="assertive"></div>
+    <div id="results" class="results" aria-live="polite"></div>
+
+    <div id="exportButtons" class="export-buttons" style="display: none;">
+      <h3>エクスポート</h3>
+      <button onclick="exportAsCSV()" class="export-btn export-csv">📥 CSV形式でダウンロード</button>
+      <button onclick="exportAsJSON()" class="export-btn export-json">📥 JSON形式でダウンロード</button>
+    </div>
+  </div>
+
+  <!-- ダークモード切り替えボタン -->
+  <button id="themeToggle" class="theme-toggle" aria-label="ダークモード切り替え" title="ダークモード切り替え">
+    <span class="theme-toggle-icon" id="themeIcon">🌙</span>
+  </button>
+
+  <script src="app.js"></script>
+</body>
+</html>
