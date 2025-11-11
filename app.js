@@ -301,7 +301,7 @@ async function resolveUsername(username) {
     }
 
     // Workers の /resolve-channel エンドポイントを呼ぶ
-    const apiUrl = workerUrl.url.replace('/?url=', '/resolve-channel') + `?username=${encodeURIComponent(cleanUsername)}`;
+    const apiUrl = workerUrl.url.replace('/?url=', '/resolve-channel') + `?handle=${encodeURIComponent(cleanUsername)}`;
 
     const response = await fetchWithTimeout(apiUrl, 10000);
 
