@@ -8,7 +8,7 @@
 ## プロジェクト概要
 
 ### プロジェクト名
-YouTube Watch History Analyzer
+Video Watch History Analyzer
 
 ### 目的
 自分のYouTube視聴履歴・コメント履歴を分析し、「前に見た動画」を思い出すための学習振り返りツール
@@ -20,6 +20,83 @@ YouTube Watch History Analyzer
 
 ### 背景
 現行の「YouTube List Tool」はチャンネル単位での動画取得に特化しているが、本ツールは**個人の視聴履歴**に焦点を当て、学習の振り返りを支援する。
+
+---
+
+## 📞 ユーザー特性（重要）
+
+このプロジェクトの主要ユーザーは**非エンジニア**です。開発者・AIアシスタントは以下の特性を常に考慮してください。
+
+### ユーザーの特徴
+- **非エンジニア**: プログラミングや技術用語に不慣れ
+- **詳細でわかりやすい説明が必要**: 省略せず、丁寧に説明する
+- **日常生活の例えを使うと理解しやすい**: 専門用語は身近な例えに置き換える
+- **コマンドはコピペできる形で提示**: 完全な形で記載し、プレースホルダーは最小限
+- **各ステップで確認を取りながら進める**: 1つずつ完了を確認してから次へ
+- **「なぜそうするのか」の理解を重視**: 手順だけでなく、理由・目的を説明する
+
+### 実装時の必須配慮
+
+#### 1. エラーメッセージは具体的なアクションを示す
+```typescript
+// ❌ NG
+throw new Error('Token expired');
+
+// ✅ OK
+throw new Error(
+  'ログイン有効期限が切れました。\n' +
+  '「ログアウト」→「再ログイン」で解決します。\n' +
+  '（有効期限: 7日間）'
+);
+```
+
+#### 2. UIラベルは結果が予測できる表現
+- ❌ NG: 「送信」
+- ✅ OK: 「視聴履歴を取得」
+
+#### 3. プログレスバーは具体的な進捗を表示
+```typescript
+// ✅ OK
+<div>
+  <p>50件中25件取得完了（50%）</p>
+  <p>あと約30秒</p>
+</div>
+```
+
+#### 4. コマンドは実行前に説明＋実行後の確認方法も提示
+```markdown
+以下のコマンドで、必要なライブラリをインストールします（3-5分かかります）。
+
+​```bash
+npm install
+​```
+
+実行後、「added 1234 packages」のようなメッセージが表示されれば成功です。
+```
+
+### コミュニケーション例
+
+#### 悪い例（専門用語が多い）
+```
+OAuth 2.0でアクセストークンを取得し、Authorization Headerに含めてリクエストします。
+トークンが期限切れの場合はリフレッシュトークンで再取得してください。
+```
+
+#### 良い例（平易な言葉＋例え）
+```
+**なぜログインが必要か：**
+YouTube APIを使うには、Googleに「この人は誰か」を証明する必要があります。
+これは図書館で本を借りるときに、図書館カードを見せるのと同じです。
+
+**仕組み：**
+1. 最初にGoogleログインすると、「利用証」（アクセストークン）がもらえます
+2. この利用証があれば、毎回ログインしなくてもデータを取得できます
+3. 利用証の有効期限は7日間です
+4. 期限が切れたら、再度ログインして新しい利用証をもらいます
+
+**あなたがすること：**
+「Googleでログイン」ボタンをクリックするだけです。
+```
 
 ---
 
@@ -1144,20 +1221,408 @@ npx wrangler secret put YOUTUBE_API_KEY
 
 ---
 
+## 開発ルール（CLAUDE.md準拠）
+
+### 守るべき作業ルール（必須）
+1. **絶対に自動で `git commit` や `git push` を実行しないこと。** 生成コードは必ず差分（`git diff` 相当）を提示し、人間の承認を得てからローカルで commit/push する。
+2. 変更を提案する前に、変更の目的と影響を自然言語で要約して示すこと。
+3. 秘密情報（APIキー等）をコード中に直接書かない。`.env.example` を提示し、実値はユーザーに設定させる。
+4. 生成するファイル・ファイル名を作成前に提示すること（例：`LoginButton.tsx` を作る／`auth.ts` を更新する）。
+5. テスト手順や手動確認方法（ブラウザでの確認手順）を必ず提示すること。
+
+### 禁止事項（厳守）
+- 自動で GitHub に push すること。
+- シークレットをハードコーディングすること。
+- README に書かれていない実行方法で動かすこと（事前に相談する）。
+- アプリ名に「YouTube」「YT」を含めること（ブランディングガイドライン違反）。
+
+### 運用上の技術的ブロック（人が実施すること）
+- リポジトリ直下に `.git/hooks/pre-push` を設置して、通常の push をブロックすること（ユーザーが明示して ALLOW_PUSH=1 等で解除できる方式を推奨）。
+- GitHub 側では main ブランチにブランチ保護ルールを設定し、直接 push を禁止する。
+
+### 最終確認ルール（コミット前）
+- 生成された差分を表示 → ユーザー承認 → ユーザーがローカルで `git add/commit` を実行 → PR を作成してレビューの上でマージ（必要に応じて）という流れを守る。
+
+### MUST - Critical Rules
+- MUST WindowsのパスはUbuntuのマウントパスに変換すること
+- 例: `C:\Users\user1\Pictures\test.jpg` → `/mnt/c/Users/user1/Pictures/test.jpg`
+
+---
+
+## セキュリティとコンプライアンス対応
+
+### YouTube API利用時の必須対応
+
+#### ポリシー順守（YouTube API サービス利用規約）
+
+**参考**:
+- [YouTube API サービス利用規約](https://developers.google.com/youtube/terms/developer-policies?hl=ja)
+- [YouTube API サービス - 開発者ポリシー](https://developers.google.com/youtube/terms/developer-policies-guide?hl=ja)
+- [YouTube ブランディングガイドライン](https://developers.google.com/youtube/terms/branding-guidelines?hl=ja)
+
+##### 1. 常時表示が必要なリンク
+
+```html
+<!-- index.html のフッターまたはヘッダーに配置 -->
+<footer class="legal-links">
+  <a href="privacy-policy.html">プライバシーポリシー</a> |
+  <a href="terms.html">利用規約</a> |
+  <a href="https://www.youtube.com/t/terms" target="_blank">YouTube 利用規約</a> |
+  <a href="https://policies.google.com/privacy" target="_blank">Google プライバシーポリシー</a>
+</footer>
+```
+
+##### 2. データアクセスの同意取得
+
+```html
+<!-- 初回使用時に表示するモーダル -->
+<div id="consent-modal">
+  <h2>データアクセスの許可</h2>
+  <p>本アプリは YouTube Data API を使用して以下のデータにアクセスします：</p>
+  <ul>
+    <li>視聴履歴（動画ID、タイトル、チャンネル名、視聴日時）</li>
+    <li>コメント履歴（コメント内容、投稿日時）</li>
+  </ul>
+  <p>
+    <a href="https://policies.google.com/privacy" target="_blank">Google プライバシーポリシー</a>
+    および
+    <a href="https://www.youtube.com/t/terms" target="_blank">YouTube 利用規約</a>
+    に同意する必要があります。
+  </p>
+  <p>
+    データアクセスは
+    <a href="https://security.google.com/settings/security/permissions" target="_blank">
+      Google セキュリティ設定
+    </a>
+    からいつでも取り消すことができます。
+  </p>
+  <label>
+    <input type="checkbox" id="api-consent" required>
+    上記に同意してYouTube Data APIの使用を許可します
+  </label>
+  <button id="accept-consent">同意して続行</button>
+</div>
+```
+
+##### 3. プライバシーポリシーの必須記載内容
+
+`privacy-policy.html` を新規作成し、以下を記載：
+
+- YouTube API サービスの使用について
+- 収集する情報の詳細（視聴履歴、コメント履歴）
+- データの使用目的（学習振り返り、検索、エクスポート）
+- データの保存期間（KV Storage: 7日間キャッシュ）
+- データの共有先（なし。すべてユーザーのブラウザ内で処理）
+- ユーザーの権利（データアクセスの取り消し、削除リクエスト）
+- Cookie とトラッキング（使用しない）
+- お問い合わせ先（GitHubリポジトリのIssues）
+- ポリシーの変更について
+
+---
+
+### APIキーの流出対策（必須）
+
+#### ❌ 間違った考え方
+
+```javascript
+// api-key.js
+// 「このリポジトリはPrivateだから安全」と考えてAPIキーを書く
+const YOUTUBE_API_KEY = "AIzaSyXXXXXXXXXXXXXXXXXX"; // ❌ 絶対にNG
+
+// git add api-key.js
+// git commit -m "Add API key"
+// git push
+```
+
+#### ⚠️ なぜ危険なのか
+
+| リスク | 内容 |
+|-------|------|
+| **Git履歴に永久保存** | 後でファイルを削除しても履歴に残る |
+| **誤って公開** | リポジトリ設定を誤ってPublicにする可能性 |
+| **アカウント侵害** | GitHubアカウントが乗っ取られたらPrivateも見られる |
+| **CI/CDログに露出** | GitHub Actions のログ、デバッグ出力に平文で記録 |
+| **ブラウザから見える** | フロントエンドで使うと開発者ツールで誰でも取得可能 |
+
+#### ✅ 正しい方法：バックエンド + 環境変数
+
+##### コード内での扱い
+
+```javascript
+// ❌ NG: コードに直接書く
+const API_KEY = "AIzaSyXXXXXXXXXXXXXXXXXX";
+
+// ✅ OK: 環境変数から取得
+const API_KEY = env.YOUTUBE_API_KEY;
+```
+
+##### .gitignore に追加
+
+```gitignore
+# 環境変数ファイルは Git にコミットしない
+.env
+.env.local
+.env.production
+```
+
+##### .env.example をコミット（サンプルのみ）
+
+```bash
+# .env.example (サンプルのみ)
+YOUTUBE_API_KEY=your_api_key_here
+GOOGLE_CLIENT_ID=your_client_id_here
+GOOGLE_CLIENT_SECRET=your_client_secret_here
+```
+
+##### 環境変数の設定（Cloudflare Workers）
+
+```bash
+# Workersに環境変数を設定
+npx wrangler secret put YOUTUBE_API_KEY
+npx wrangler secret put GOOGLE_CLIENT_ID
+npx wrangler secret put GOOGLE_CLIENT_SECRET
+```
+
+##### 実装例：Cloudflare Workers（必須アーキテクチャ）
+
+```
+[ユーザー]
+    ↓ チャンネルID
+[フロントエンド (Cloudflare Pages)]
+    ↓ HTTPS リクエスト（APIキーなし）
+[バックエンド API (Cloudflare Workers)]
+    ↓ APIキーを使用（環境変数から取得）
+[YouTube Data API]
+```
+
+```javascript
+// workers/youtube-api.js (Cloudflare Workers)
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    const channelId = url.searchParams.get('channelId');
+
+    // 環境変数からAPIキーを取得
+    const API_KEY = env.YOUTUBE_API_KEY;
+
+    // YouTube Data API を呼び出し
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails&id=${channelId}&key=${API_KEY}`
+    );
+
+    const data = await response.json();
+
+    // CORS ヘッダーを追加
+    return new Response(JSON.stringify(data), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': 'https://your-app.pages.dev'
+      }
+    });
+  }
+};
+```
+
+```javascript
+// app.js (フロントエンド)
+async function fetchHistory() {
+  // 自分のWorkers エンドポイントを呼び出し（APIキーは含めない）
+  const response = await fetch(
+    `https://your-worker.workers.dev/api/history`
+  );
+  const data = await response.json();
+  return data;
+}
+```
+
+---
+
+### 認証・認可の実装（必須）
+
+#### なぜ認証が必要か
+
+##### シナリオA：認証なし（危険）
+
+```
+[悪意のあるユーザー]
+    ↓ 大量のリクエスト（制限なし）
+[あなたのバックエンドAPI]
+    ↓ あなたのAPIキーを使用
+[YouTube Data API]
+    ↓
+[APIクォータ超過 → あなたに課金]
+```
+
+**問題点**:
+- 誰でもあなたのAPIを叩ける
+- 悪意のあるユーザーが大量リクエストを送る
+- あなたのYouTube API クォータを使い果たす
+- 課金が発生する可能性
+
+##### シナリオB：認証あり（安全）
+
+```
+[ユーザー]
+    ↓ Googleログイン
+[OAuth 2.0認証 (Google)]
+    ↓ トークン発行
+[ユーザー]
+    ↓ トークン付きリクエスト
+[あなたのバックエンドAPI]
+    ↓ トークン検証 + レート制限
+    ↓ あなたのAPIキーを使用
+[YouTube Data API]
+```
+
+#### 実装例：認証 + レート制限
+
+```javascript
+// workers/youtube-api.js
+export default {
+  async fetch(request, env) {
+    // 1. 認証トークンを検証
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response('Unauthorized', { status: 401 });
+    }
+
+    const token = authHeader.substring(7);
+
+    // Google OAuth 2.0トークンを検証
+    const isValid = await verifyGoogleToken(token);
+    if (!isValid) {
+      return new Response('Invalid token', { status: 403 });
+    }
+
+    // 2. レート制限を実装（Durable Objects使用）
+    const userId = extractUserIdFromToken(token);
+    const rateLimiterId = env.RATE_LIMITER.idFromName(userId);
+    const rateLimiter = env.RATE_LIMITER.get(rateLimiterId);
+
+    const isAllowed = await rateLimiter.checkLimit();
+    if (!isAllowed) {
+      return new Response('Rate limit exceeded', { status: 429 });
+    }
+
+    // 3. YouTube API を呼び出し
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=HL&key=${env.YOUTUBE_API_KEY}`
+    );
+
+    return response;
+  }
+};
+```
+
+---
+
+### プライバシーポリシー（必須記載）
+
+#### 本アプリケーション使用時に送信される情報
+
+本ツールを使用すると、以下の情報が自動的に処理されます：
+
+##### Google/YouTubeに送信される情報
+- **Googleアカウント情報**: ログイン時にGoogleに送信（OAuth 2.0）
+- **アクセストークン**: YouTube Data API v3へのアクセスに使用
+- **視聴履歴リクエスト**: プレイリストID `HL`（視聴履歴）の取得リクエスト
+- **コメント検索リクエスト**: 各動画のコメント検索リクエスト
+- **IPアドレス**: YouTube Data API v3へのリクエスト時に自動送信
+
+##### 本アプリケーションのバックエンド（Cloudflare Workers）に送信される情報
+- **アクセストークン**: 認証・認可のため
+- **ユーザーID**: レート制限のため（KV Storageに一時保存、7日間TTL）
+- **リクエスト内容**: 取得件数、日付範囲、動画ID
+
+#### 本アプリケーション自体によるデータ管理
+
+本アプリケーション自体は：
+
+- ✅ **視聴履歴データを永続保存しません**（すべてブラウザ内で処理されます）
+- ✅ **KV Storageでキャッシュ**（7日間TTL、API クォータ削減のため）
+- ✅ **サーバーログを記録しません**（Cloudflare Workersのデフォルト）
+- ✅ **Cookie を使用しません**（トークンはAuthorization Header）
+- ✅ **アクセス解析を行いません**（Cloudflare Analyticsのみ）
+
+#### 利用者の同意
+
+本ツールの「Googleでログイン」ボタンをクリックすることで、上記の情報が処理されることに同意したものとみなします。
+
+---
+
 ## 補足事項
 
-### 開発上の注意
-1. **CLAUDE.md準拠**: 自動コミット禁止、差分提示必須
-2. **セキュリティ**: APIキー・シークレットを絶対にコミットしない
-3. **テスト**: デプロイ前に必ずデプロイチェックリスト実施
-4. **ドキュメント**: `.docs/HANDOVER/`にPhaseごとの引き継ぎ文書を作成
-
 ### デプロイ前チェックリスト
+
+#### セキュリティ
 - [ ] `.env.example`を作成（実値は含めない）
-- [ ] wrangler.tomlに本番URLを設定
+- [ ] `.env` を `.gitignore` に追加
+- [ ] APIキーを環境変数で管理（wrangler secret put）
+- [ ] wrangler.tomlにKV Namespace IDを設定
 - [ ] CORS設定を本番ドメインに更新
-- [ ] Google Cloud ConsoleのリダイレクトURIを本番URLに追加
+- [ ] XSS対策（Reactの標準エスケープ）を確認
+
+#### YouTube API ポリシー
+- [ ] `privacy-policy.html` を作成
+- [ ] `terms.html` を作成
+- [ ] フッターに法的リンクを常時表示
+- [ ] 初回使用時に同意モーダルを表示
+- [ ] Google プライバシーポリシーへのリンクを追加
+- [ ] YouTube 利用規約へのリンクを追加
+- [ ] Google セキュリティ設定へのアクセス方法を説明
+
+#### Google Cloud Console
+- [ ] OAuth 2.0クライアントID作成
+- [ ] YouTube Data API v3有効化
+- [ ] リダイレクトURIを本番URLに追加（例: `https://your-app.pages.dev/auth/callback`）
+- [ ] スコープ設定（`youtube.readonly`, `youtube.force-ssl`）
+
+#### デプロイ設定
+- [ ] GitHub Actionsワークフロー作成（`.github/workflows/deploy-*.yml`）
+- [ ] Cloudflare Pagesのビルド設定（Vite: `npm run build`, 出力: `dist/`）
+- [ ] Cloudflare Workers のデプロイ（`wrangler deploy`）
+
+#### テスト
 - [ ] スモークテスト実施（ログイン → 視聴履歴取得 → エクスポート）
+- [ ] エラーハンドリング確認（トークン期限切れ、API クォータ超過）
+- [ ] レスポンシブデザイン確認（スマホ、タブレット、PC）
+- [ ] ダークモード動作確認
+
+---
+
+## 重要な公式ドキュメント
+
+### 必読ドキュメント
+
+#### YouTube/Google関連
+- **[YouTube Data API v3リファレンス](https://developers.google.com/youtube/v3/docs)** - 全エンドポイントの詳細仕様
+- **[YouTube API サービス利用規約](https://developers.google.com/youtube/terms/developer-policies?hl=ja)** - 必須遵守事項
+- **[YouTube API サービス - 開発者ポリシー](https://developers.google.com/youtube/terms/developer-policies-guide?hl=ja)** - 詳細ガイド
+- **[YouTube ブランディングガイドライン](https://developers.google.com/youtube/terms/branding-guidelines?hl=ja)** - アプリ名の制限
+- **[Google OAuth 2.0公式ドキュメント](https://developers.google.com/identity/protocols/oauth2)** - 認証フロー実装
+- **[YouTube Data API v3認証ガイド](https://developers.google.com/youtube/v3/guides/authentication)** - YouTube特有の認証
+- **[Google プライバシーポリシー](https://policies.google.com/privacy)** - リンク必須
+- **[YouTube 利用規約](https://www.youtube.com/t/terms)** - リンク必須
+
+#### フレームワーク・ライブラリ
+- **[React公式ドキュメント](https://react.dev/)** - React 18の最新情報
+- **[Vite公式ドキュメント](https://vitejs.dev/)** - ビルド設定
+- **[TailwindCSS公式ドキュメント](https://tailwindcss.com/)** - UIスタイリング
+- **[Cloudflare Workers公式ドキュメント](https://developers.cloudflare.com/workers/)** - バックエンド実装
+- **[Cloudflare KV Storage](https://developers.cloudflare.com/kv/)** - キャッシュ実装
+- **[Cloudflare Durable Objects](https://developers.cloudflare.com/durable-objects/)** - レート制限実装
+
+### ドキュメント参照の重要性
+
+**実装時は必ず最新の公式ドキュメントを確認すること。** 以下の理由から：
+
+1. **API仕様の変更**: YouTube Data API v3は予告なく変更される可能性がある
+2. **クォータ制限の変更**: 消費ユニット数が変わる可能性がある
+3. **ポリシーの更新**: YouTube API利用規約は定期的に更新される
+4. **非推奨機能**: 古い実装が非推奨になる可能性がある
+5. **セキュリティアップデート**: OAuth 2.0のベストプラクティスが変わる可能性がある
+
+**本要件定義書の情報は2025-11-11時点のものであり、実装時は必ず公式ドキュメントで最新情報を確認すること。**
 
 ---
 
