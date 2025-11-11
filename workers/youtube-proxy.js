@@ -398,10 +398,35 @@ async function handleFetchVideos(request, env) {
     }
   }
 
+  // チャンネル名を取得（channels.list API呼び出し）
+  let channelTitle = '';
+  try {
+    const channelParams = new URLSearchParams();
+    channelParams.set('part', 'snippet');
+    channelParams.set('id', channelId);
+    channelParams.set('fields', 'items(snippet/title)');
+    channelParams.set('key', apiKey);
+
+    const channelRes = await youtubeApiFetchJson('/channels', channelParams, {
+      timeoutMs: 10000,
+      maxRetries: 2,
+      request,
+      env,
+    });
+
+    if (channelRes.data && channelRes.data.items && channelRes.data.items[0]) {
+      channelTitle = channelRes.data.items[0].snippet?.title || '';
+    }
+  } catch (e) {
+    // チャンネル名取得失敗時は空文字列のまま続行
+    console.warn('Failed to fetch channel title:', e);
+  }
+
   // レスポンス構築
   const payload = {
     ok: true,
     channelId,
+    channelTitle,
     count: videos.length,
     totalFetched: scannedTotal,
     partial,

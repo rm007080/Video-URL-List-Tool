@@ -11,7 +11,7 @@
     <h1>Video URL List Tool</h1>
 
     <p class="description">
-      YouTube チャンネルに対応した動画URL・タイトル・公開日の取得ツール（最新15件まで）
+      YouTube チャンネルに対応した動画URL・タイトル・公開日の取得ツール
     </p>
 
     <div class="info-box">
@@ -36,9 +36,13 @@
     <div class="form-group">
       <label for="limitSelect">取得件数:</label>
       <select id="limitSelect">
-        <option value="5">最新5件</option>
-        <option value="10">最新10件</option>
-        <option value="15" selected>最新15件（最大）</option>
+        <option value="5">最新5件（RSS - 高速）</option>
+        <option value="10">最新10件（RSS - 高速）</option>
+        <option value="15" selected>最新15件（RSS - 高速）</option>
+        <option value="50">最新50件（API使用 - 段階的ロード）</option>
+        <option value="100">最新100件（API使用 - 段階的ロード）</option>
+        <option value="500">最新500件（API使用 - 段階的ロード）</option>
+        <option value="-1">全件（API使用 - 段階的ロード、時間がかかります）</option>
       </select>
     </div>
 
@@ -72,8 +76,24 @@
       <p id="loadingText">取得中...</p>
     </div>
 
+    <!-- プログレス表示コンテナ（段階的ロード用） -->
+    <div id="progressContainer" class="progress-container" hidden>
+      <div class="progress-header">
+        <span id="progressText">動画を取得中...</span>
+        <button id="cancelButton" class="cancel-button">キャンセル</button>
+      </div>
+      <div class="progress-bar-container">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+    </div>
+
     <div id="errors" class="errors" aria-live="assertive"></div>
     <div id="results" class="results" aria-live="polite"></div>
+
+    <!-- さらに読み込むボタン -->
+    <button id="loadMoreButton" class="load-more-button" style="display: none;">
+      さらに読み込む
+    </button>
 
     <div id="exportButtons" class="export-buttons" style="display: none;">
       <h3>エクスポート</h3>

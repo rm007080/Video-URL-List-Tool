@@ -11,10 +11,10 @@ name = "RATE_LIMITER"
 class_name = "RateLimiter"
 script_name = "youtube-list-tool-proxy"
 
-# マイグレーション設定
+# マイグレーション設定（無料プランでDurable Objectsを使用するため new_sqlite_classes を使用）
 [[migrations]]
 tag = "v1"
-new_classes = ["RateLimiter"]
+new_sqlite_classes = ["RateLimiter"]
 
 [env.production]
 name = "youtube-list-tool-proxy"
