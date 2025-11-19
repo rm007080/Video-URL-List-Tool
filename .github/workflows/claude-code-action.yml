@@ -15,6 +15,7 @@ permissions:
 jobs:
   claude-code-action:
     runs-on: ubuntu-latest
+    secrets: inherit
     if: |
       (github.event_name == 'pull_request') ||
       (github.event_name == 'issue_comment' && 
@@ -30,5 +31,7 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
 
 
